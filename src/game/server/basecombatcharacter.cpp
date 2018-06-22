@@ -91,7 +91,7 @@ BEGIN_DATADESC( CBaseCombatCharacter )
 	DEFINE_FIELD( m_eHull, FIELD_INTEGER ),
 	DEFINE_FIELD( m_bloodColor, FIELD_INTEGER ),
 	DEFINE_FIELD( m_iDamageCount, FIELD_INTEGER ),
-	
+
 	DEFINE_FIELD( m_flFieldOfView, FIELD_FLOAT ),
 	DEFINE_FIELD( m_HackedGunPos, FIELD_VECTOR ),
 	DEFINE_KEYFIELD( m_RelationshipString, FIELD_STRING, "Relationship" ),
@@ -128,7 +128,7 @@ int					CBaseCombatCharacter::m_lastInteraction   = 0;
 Relationship_t**	CBaseCombatCharacter::m_DefaultRelationship	= NULL;
 
 //-----------------------------------------------------------------------------
-// Purpose: 
+// Purpose:
 //-----------------------------------------------------------------------------
 class CCleanupDefaultRelationShips : public CAutoGameSystem
 {
@@ -158,7 +158,7 @@ void *SendProxy_SendBaseCombatCharacterLocalDataTable( const SendProp *pProp, co
 {
 	// Only send to local player if this is a player
 	pRecipients->ClearAllRecipients();
-	
+
 	CBaseCombatCharacter *pBCC = ( CBaseCombatCharacter * )pStruct;
 	if ( pBCC != NULL)
 	{
@@ -193,9 +193,6 @@ END_SEND_TABLE();
 // This table encodes the CBaseCombatCharacter
 //-----------------------------------------------------------------------------
 IMPLEMENT_SERVERCLASS_ST(CBaseCombatCharacter, DT_BaseCombatCharacter)
-#ifdef GLOWS_ENABLE
-	SendPropBool( SENDINFO( m_bGlowEnabled ) ),
-#endif // GLOWS_ENABLE
 	// Data that only gets sent to the local player.
 	SendPropDataTable( "bcc_localdata", 0, &REFERENCE_SEND_TABLE(DT_BCCLocalPlayerExclusive), SendProxy_SendBaseCombatCharacterLocalDataTable ),
 
@@ -203,7 +200,7 @@ IMPLEMENT_SERVERCLASS_ST(CBaseCombatCharacter, DT_BaseCombatCharacter)
 	SendPropArray3( SENDINFO_ARRAY3(m_hMyWeapons), SendPropEHandle( SENDINFO_ARRAY(m_hMyWeapons) ) ),
 
 #ifdef INVASION_DLL
-	SendPropInt( SENDINFO(m_iPowerups), MAX_POWERUPS, SPROP_UNSIGNED ), 
+	SendPropInt( SENDINFO(m_iPowerups), MAX_POWERUPS, SPROP_UNSIGNED ),
 #endif
 
 END_SEND_TABLE()
@@ -238,7 +235,7 @@ bool CBaseCombatCharacter::HasHumanGibs( void )
 		 myClass == CLASS_COMBINE			||
 		 myClass == CLASS_CONSCRIPT			||
 		 myClass == CLASS_METROPOLICE		||
-		 myClass == CLASS_PLAYER )	
+		 myClass == CLASS_PLAYER )
 		 return true;
 
 #elif defined( HL1_DLL )
@@ -253,7 +250,7 @@ bool CBaseCombatCharacter::HasHumanGibs( void )
 
 #elif defined( CSPORT_DLL )
 	Class_T myClass = Classify();
-	if (	 myClass == CLASS_PLAYER )	
+	if (	 myClass == CLASS_PLAYER )
 	{
 		return true;
 	}
@@ -268,7 +265,7 @@ bool CBaseCombatCharacter::HasAlienGibs( void )
 {
 #if defined( HL2_DLL )
 	Class_T myClass = Classify();
-	if ( myClass == CLASS_BARNACLE		 || 
+	if ( myClass == CLASS_BARNACLE		 ||
 		 myClass == CLASS_STALKER		 ||
 		 myClass == CLASS_ZOMBIE		 ||
 		 myClass == CLASS_VORTIGAUNT	 ||
@@ -336,7 +333,7 @@ bool CBaseCombatCharacter::FVisible( CBaseEntity *pEntity, int traceMask, CBaseE
 
 	if ( traceMask != MASK_BLOCKLOS || !ShouldUseVisibilityCache() || pEntity == this
 #if defined(HL2_DLL)
-		 || Classify() == CLASS_BULLSEYE || pEntity->Classify() == CLASS_BULLSEYE 
+		 || Classify() == CLASS_BULLSEYE || pEntity->Classify() == CLASS_BULLSEYE
 #endif
 		 )
 	{
@@ -456,7 +453,7 @@ bool CBaseCombatCharacter::FVisibleThroughPortal( const CProp_Portal *pPortal, C
 #if HL1_DLL
 	// FIXME: only block LOS through opaque water
 	// don't look through water
-	if ((m_nWaterLevel != 3 && pEntity->m_nWaterLevel == 3) 
+	if ((m_nWaterLevel != 3 && pEntity->m_nWaterLevel == 3)
 		|| (m_nWaterLevel == 3 && pEntity->m_nWaterLevel == 0))
 		return false;
 #endif
@@ -513,7 +510,7 @@ bool CBaseCombatCharacter::FVisibleThroughPortal( const CProp_Portal *pPortal, C
 //=========================================================
 // FInViewCone - returns true is the passed ent is in
 // the caller's forward view cone. The dot product is performed
-// in 2d, making the view cone infinitely tall. 
+// in 2d, making the view cone infinitely tall.
 //=========================================================
 bool CBaseCombatCharacter::FInViewCone( CBaseEntity *pEntity )
 {
@@ -523,7 +520,7 @@ bool CBaseCombatCharacter::FInViewCone( CBaseEntity *pEntity )
 //=========================================================
 // FInViewCone - returns true is the passed Vector is in
 // the caller's forward view cone. The dot product is performed
-// in 2d, making the view cone infinitely tall. 
+// in 2d, making the view cone infinitely tall.
 //=========================================================
 bool CBaseCombatCharacter::FInViewCone( const Vector &vecSpot )
 {
@@ -539,7 +536,7 @@ bool CBaseCombatCharacter::FInViewCone( const Vector &vecSpot )
 //=========================================================
 // FInViewCone - returns true is the passed ent is in
 // the caller's forward view cone. The dot product is performed
-// in 2d, making the view cone infinitely tall. 
+// in 2d, making the view cone infinitely tall.
 //=========================================================
 CProp_Portal* CBaseCombatCharacter::FInViewConeThroughPortal( CBaseEntity *pEntity )
 {
@@ -549,7 +546,7 @@ CProp_Portal* CBaseCombatCharacter::FInViewConeThroughPortal( CBaseEntity *pEnti
 //=========================================================
 // FInViewCone - returns true is the passed Vector is in
 // the caller's forward view cone. The dot product is performed
-// in 2d, making the view cone infinitely tall. 
+// in 2d, making the view cone infinitely tall.
 //=========================================================
 CProp_Portal* CBaseCombatCharacter::FInViewConeThroughPortal( const Vector &vecSpot )
 {
@@ -609,7 +606,7 @@ CProp_Portal* CBaseCombatCharacter::FInViewConeThroughPortal( const Vector &vecS
 
 			for ( int i = 0; i < 4; ++i )
 			{
-				//Vector vPortalCorner = pPortal->GetAbsOrigin() + vPortalRight * PORTAL_HALF_WIDTH * ( ( i / 2 == 0 ) ? ( 1.0f ) : ( -1.0f ) ) + 
+				//Vector vPortalCorner = pPortal->GetAbsOrigin() + vPortalRight * PORTAL_HALF_WIDTH * ( ( i / 2 == 0 ) ? ( 1.0f ) : ( -1.0f ) ) +
 				//												 vPortalUp * PORTAL_HALF_HEIGHT * ( ( i % 2 == 0 ) ? ( 1.0f ) : ( -1.0f ) );
 
 				Vector vEyeToCorner = pPortal->m_vPortalCorners[i] - ptEyePosition;
@@ -645,7 +642,7 @@ CProp_Portal* CBaseCombatCharacter::FInViewConeThroughPortal( const Vector &vecS
 //=========================================================
 // FInAimCone - returns true is the passed ent is in
 // the caller's forward aim cone. The dot product is performed
-// in 2d, making the aim cone infinitely tall. 
+// in 2d, making the aim cone infinitely tall.
 //=========================================================
 bool CBaseCombatCharacter::FInAimCone( CBaseEntity *pEntity )
 {
@@ -716,7 +713,7 @@ CBaseCombatCharacter::CBaseCombatCharacter( void )
 
 	// reset all ammo values to 0
 	RemoveAllAmmo();
-	
+
 	// not alive yet
 	m_aliveTimer.Invalidate();
 	m_hasBeenInjured = 0;
@@ -739,10 +736,6 @@ CBaseCombatCharacter::CBaseCombatCharacter( void )
 	m_impactEnergyScale = 1.0f;
 
 	m_bForceServerRagdoll = ai_force_serverside_ragdoll.GetBool();
-
-#ifdef GLOWS_ENABLE
-	m_bGlowEnabled.Set( false );
-#endif // GLOWS_ENABLE
 }
 
 //------------------------------------------------------------------------------
@@ -762,7 +755,7 @@ CBaseCombatCharacter::~CBaseCombatCharacter( void )
 void CBaseCombatCharacter::Spawn( void )
 {
 	BaseClass::Spawn();
-	
+
 	SetBlocksLOS( false );
 	m_aliveTimer.Start();
 	m_hasBeenInjured = 0;
@@ -778,7 +771,7 @@ void CBaseCombatCharacter::Spawn( void )
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
+// Purpose:
 //-----------------------------------------------------------------------------
 void CBaseCombatCharacter::Precache()
 {
@@ -788,9 +781,9 @@ void CBaseCombatCharacter::Precache()
 	PrecacheScriptSound( "BaseCombatCharacter.StopWeaponSounds" );
 	PrecacheScriptSound( "BaseCombatCharacter.AmmoPickup" );
 
-	for ( int i = m_Relationship.Count() - 1; i >= 0 ; i--) 
+	for ( int i = m_Relationship.Count() - 1; i >= 0 ; i--)
 	{
-		if ( !m_Relationship[i].entity && m_Relationship[i].classType == CLASS_NONE ) 
+		if ( !m_Relationship[i].entity && m_Relationship[i].classType == CLASS_NONE )
 		{
 			DevMsg( 2, "Removing relationship for lost entity\n" );
 			m_Relationship.FastRemove( i );
@@ -799,7 +792,7 @@ void CBaseCombatCharacter::Precache()
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
+// Purpose:
 //-----------------------------------------------------------------------------
 int CBaseCombatCharacter::Restore( IRestore &restore )
 {
@@ -813,7 +806,7 @@ int CBaseCombatCharacter::Restore( IRestore &restore )
 
 		for ( int i = m_Relationship.Count() - 1; i >= 0; --i )
 		{
-			if ( !m_Relationship[i].entity && m_Relationship[i].classType != CLASS_NONE ) 
+			if ( !m_Relationship[i].entity && m_Relationship[i].classType != CLASS_NONE )
 			{
 				m_Relationship.FastRemove( i );
 			}
@@ -825,15 +818,15 @@ int CBaseCombatCharacter::Restore( IRestore &restore )
 
 
 //-----------------------------------------------------------------------------
-// Purpose: 
+// Purpose:
 //-----------------------------------------------------------------------------
 void CBaseCombatCharacter::UpdateOnRemove( void )
 {
 	int i;
 	// Make sure any weapons I didn't drop get removed.
-	for (i=0;i<MAX_WEAPONS;i++) 
+	for (i=0;i<MAX_WEAPONS;i++)
 	{
-		if (m_hMyWeapons[i]) 
+		if (m_hMyWeapons[i])
 		{
 			UTIL_Remove( m_hMyWeapons[i] );
 		}
@@ -846,10 +839,6 @@ void CBaseCombatCharacter::UpdateOnRemove( void )
 		pOwner->DeathNotice( this );
 		SetOwnerEntity( NULL );
 	}
-
-#ifdef GLOWS_ENABLE
-	RemoveGlowEffect();
-#endif // GLOWS_ENABLE
 
 	// Chain at end to mimic destructor unwind order
 	BaseClass::UpdateOnRemove();
@@ -964,7 +953,7 @@ Activity CBaseCombatCharacter::GetDeathActivity ( void )
 	// can we perform the prescribed death?
 	if ( SelectWeightedSequence ( deathActivity ) == ACTIVITY_NOT_AVAILABLE )
 	{
-		// no! did we fail to perform a directional death? 
+		// no! did we fail to perform a directional death?
 		if ( fTriedDirection )
 		{
 			// if yes, we're out of options. Go simple.
@@ -998,7 +987,7 @@ Activity CBaseCombatCharacter::GetDeathActivity ( void )
 	if ( deathActivity == ACT_DIEFORWARD )
 	{
 			// make sure there's room to fall forward
-			UTIL_TraceHull ( vecSrc, vecSrc + forward * 64, Vector(-16,-16,-18), 
+			UTIL_TraceHull ( vecSrc, vecSrc + forward * 64, Vector(-16,-16,-18),
 				Vector(16,16,18), MASK_SOLID, this, COLLISION_GROUP_NONE, &tr );
 
 			if ( tr.fraction != 1.0 )
@@ -1010,7 +999,7 @@ Activity CBaseCombatCharacter::GetDeathActivity ( void )
 	if ( deathActivity == ACT_DIEBACKWARD )
 	{
 			// make sure there's room to fall backward
-			UTIL_TraceHull ( vecSrc, vecSrc - forward * 64, Vector(-16,-16,-18), 
+			UTIL_TraceHull ( vecSrc, vecSrc - forward * 64, Vector(-16,-16,-18),
 				Vector(16,16,18), MASK_SOLID, this, COLLISION_GROUP_NONE, &tr );
 
 			if ( tr.fraction != 1.0 )
@@ -1070,7 +1059,7 @@ void CBaseCombatCharacter::Weapon_FrameUpdate( void )
 
 
 //------------------------------------------------------------------------------
-// Purpose :	expects a length to trace, amount 
+// Purpose :	expects a length to trace, amount
 //				of damage to do, and damage type. Returns a pointer to
 //				the damaged entity in case the NPC wishes to do
 //				other stuff to the victim (punchangle, etc)
@@ -1087,7 +1076,7 @@ CBaseEntity *CBaseCombatCharacter::CheckTraceHullAttack( float flDist, const Vec
 	Vector vStart = GetAbsOrigin();
 
 	// The ideal place to start the trace is in the center of the attacker's bounding box.
-	// however, we need to make sure there's enough clearance. Some of the smaller monsters aren't 
+	// however, we need to make sure there's enough clearance. Some of the smaller monsters aren't
 	// as big as the hull we try to trace with. (SJB)
 	float flVerticalOffset = WorldAlignSize().z * 0.5;
 
@@ -1104,9 +1093,9 @@ CBaseEntity *CBaseCombatCharacter::CheckTraceHullAttack( float flDist, const Vec
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
-// Input  : *pHandleEntity - 
-//			contentsMask - 
+// Purpose:
+// Input  : *pHandleEntity -
+//			contentsMask -
 // Output : Returns true on success, false on failure.
 //-----------------------------------------------------------------------------
 bool CTraceFilterMelee::ShouldHitEntity( IHandleEntity *pHandleEntity, int contentsMask )
@@ -1119,12 +1108,12 @@ bool CTraceFilterMelee::ShouldHitEntity( IHandleEntity *pHandleEntity, int conte
 
 	// Don't test if the game code tells us we should ignore this collision...
 	CBaseEntity *pEntity = EntityFromEntityHandle( pHandleEntity );
-	
+
 	if ( pEntity )
 	{
 		if ( !pEntity->ShouldCollide( m_collisionGroup, contentsMask ) )
 			return false;
-		
+
 		if ( !g_pGameRules->ShouldCollide( m_collisionGroup, pEntity->GetCollisionGroup() ) )
 			return false;
 
@@ -1148,7 +1137,7 @@ bool CTraceFilterMelee::ShouldHitEntity( IHandleEntity *pHandleEntity, int conte
 		Vector	attackDir = pEntity->WorldSpaceCenter() - m_dmgInfo->GetAttacker()->WorldSpaceCenter();
 		VectorNormalize( attackDir );
 
-		CTakeDamageInfo info = (*m_dmgInfo);				
+		CTakeDamageInfo info = (*m_dmgInfo);
 		CalculateMeleeDamageForce( &info, attackDir, info.GetAttacker()->WorldSpaceCenter(), m_flForceScale );
 
 		CBaseCombatCharacter *pBCC = info.GetAttacker()->MyCombatCharacterPointer();
@@ -1164,7 +1153,7 @@ bool CTraceFilterMelee::ShouldHitEntity( IHandleEntity *pHandleEntity, int conte
 				{
 					pEntity->TakeDamage( info );
 				}
-				
+
 				// Put a combat sound in
 				CSoundEnt::InsertSound( SOUND_COMBAT, info.GetDamagePosition(), 200, 0.2f, info.GetAttacker() );
 
@@ -1191,7 +1180,7 @@ bool CTraceFilterMelee::ShouldHitEntity( IHandleEntity *pHandleEntity, int conte
 }
 
 //------------------------------------------------------------------------------
-// Purpose :	start and end trace position, amount 
+// Purpose :	start and end trace position, amount
 //				of damage to do, and damage type. Returns a pointer to
 //				the damaged entity in case the NPC wishes to do
 //				other stuff to the victim (punchangle, etc)
@@ -1217,7 +1206,7 @@ CBaseEntity *CBaseCombatCharacter::CheckTraceHullAttack( const Vector &vStart, c
 #if 1
 
 	CTakeDamageInfo	dmgInfo( this, this, iDamage, iDmgType );
-	
+
 	// COLLISION_GROUP_PROJECTILE does some handy filtering that's very appropriate for this type of attack, as well. (sjb) 7/25/2007
 	CTraceFilterMelee traceFilter( this, COLLISION_GROUP_PROJECTILE, &dmgInfo, flForceScale, bDamageAnyNPC );
 
@@ -1228,7 +1217,7 @@ CBaseEntity *CBaseCombatCharacter::CheckTraceHullAttack( const Vector &vStart, c
 	enginetrace->TraceRay( ray, MASK_SHOT_HULL, &traceFilter, &tr );
 
 	CBaseEntity *pEntity = traceFilter.m_pHit;
-	
+
 	if ( pEntity == NULL )
 	{
 		// See if perhaps I'm trying to claw/bash someone who is standing on my head.
@@ -1242,7 +1231,7 @@ CBaseEntity *CBaseCombatCharacter::CheckTraceHullAttack( const Vector &vStart, c
 		vecTopCenter.z = vecMaxs.z + 1.0f;
 		vecEnd = vecTopCenter;
 		vecEnd.z += 2.0f;
-		
+
 		ray.Init( vecTopCenter, vEnd, mins, maxs );
 		enginetrace->TraceRay( ray, MASK_SHOT_HULL, &traceFilter, &tr );
 
@@ -1360,7 +1349,7 @@ Vector CBaseCombatCharacter::CalcDamageForceVector( const CTakeDamageInfo &info 
 		if( info.GetDamageType() & DMG_BLAST )
 		{
 			// Fudge blast forces a little bit, so that each
-			// victim gets a slightly different trajectory. 
+			// victim gets a slightly different trajectory.
 			// This simulates features that usually vary from
 			// person-to-person variables such as bodyweight,
 			// which are all indentical for characters using the same model.
@@ -1388,7 +1377,7 @@ Vector CBaseCombatCharacter::CalcDamageForceVector( const CTakeDamageInfo &info 
 		float forceScale = info.GetDamage() * 75 * 4;
 
 		Vector forceVector;
-		// If the damage is a blast, point the force vector higher than usual, this gives 
+		// If the damage is a blast, point the force vector higher than usual, this gives
 		// the ragdolls a bodacious "really got blowed up" look.
 		if( info.GetDamageType() & DMG_BLAST )
 		{
@@ -1435,7 +1424,7 @@ Vector CBaseCombatCharacter::CalcDamageForceVector( const CTakeDamageInfo &info 
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
+// Purpose:
 // Output : Returns true on success, false on failure.
 //-----------------------------------------------------------------------------
 void CBaseCombatCharacter::FixupBurningServerRagdoll( CBaseEntity *pRagdoll )
@@ -1482,7 +1471,7 @@ bool CBaseCombatCharacter::BecomeRagdollBoogie( CBaseEntity *pKiller, const Vect
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
+// Purpose:
 //-----------------------------------------------------------------------------
 bool CBaseCombatCharacter::BecomeRagdoll( const CTakeDamageInfo &info, const Vector &forceVector )
 {
@@ -1536,7 +1525,7 @@ bool CBaseCombatCharacter::BecomeRagdoll( const CTakeDamageInfo &info, const Vec
 	}
 #endif
 
-#ifdef HL2_DLL	
+#ifdef HL2_DLL
 
 	bool bMegaPhyscannonActive = false;
 #if !defined( HL2MP )
@@ -1604,7 +1593,7 @@ void CBaseCombatCharacter::Event_Killed( const CTakeDamageInfo &info )
 	{
 		Weapon_Drop( m_hActiveWeapon );
 	}
-	
+
 	// if flagged to drop a health kit
 	if (HasSpawnFlags(SF_NPC_DROP_HEALTHKIT))
 	{
@@ -1656,7 +1645,7 @@ void CBaseCombatCharacter::Event_Killed( const CTakeDamageInfo &info )
 			BecomeRagdoll( info, forceVector );
 		}
 	}
-	
+
 	// no longer standing on a nav area
 	ClearLastKnownArea();
 
@@ -1667,15 +1656,11 @@ void CBaseCombatCharacter::Event_Killed( const CTakeDamageInfo &info )
 		GetOwnerEntity()->DeathNotice( this );
 	}
 #endif
-	
+
 #ifdef NEXT_BOT
 	// inform bots
 	TheNextBots().OnKilled( this, info );
 #endif
-
-#ifdef GLOWS_ENABLE
-	RemoveGlowEffect();
-#endif // GLOWS_ENABLE
 }
 
 void CBaseCombatCharacter::Event_Dying( const CTakeDamageInfo &info )
@@ -1774,7 +1759,7 @@ void CBaseCombatCharacter::ThrowDirForWeaponStrip( CBaseCombatWeapon *pWeapon, c
 //-----------------------------------------------------------------------------
 // For weapon strip
 //-----------------------------------------------------------------------------
-void CBaseCombatCharacter::DropWeaponForWeaponStrip( CBaseCombatWeapon *pWeapon, 
+void CBaseCombatCharacter::DropWeaponForWeaponStrip( CBaseCombatWeapon *pWeapon,
 	const Vector &vecForward, const QAngle &vecAngles, float flDiameter )
 {
 	Vector vecOrigin;
@@ -1789,7 +1774,7 @@ void CBaseCombatCharacter::DropWeaponForWeaponStrip( CBaseCombatWeapon *pWeapon,
 
 	trace_t	tr;
 	UTIL_TraceLine( vecOrigin, vecOffsetOrigin, MASK_SOLID_BRUSHONLY, this, COLLISION_GROUP_NONE, &tr );
-		
+
 	if ( tr.startsolid || tr.allsolid || ( tr.fraction < 1.0f && tr.m_pEnt != pWeapon ) )
 	{
 		//FIXME: Throw towards a known safe spot?
@@ -1815,7 +1800,7 @@ void CBaseCombatCharacter::Weapon_DropAll( bool bDisallowWeaponPickup )
 {
 	if ( GetFlags() & FL_NPC )
 	{
-		for (int i=0; i<MAX_WEAPONS; ++i) 
+		for (int i=0; i<MAX_WEAPONS; ++i)
 		{
 			CBaseCombatWeapon *pWeapon = m_hMyWeapons[i];
 			if (!pWeapon)
@@ -1836,7 +1821,7 @@ void CBaseCombatCharacter::Weapon_DropAll( bool bDisallowWeaponPickup )
 		CollisionProp()->OBBSize().y * CollisionProp()->OBBSize().y );
 
 	CBaseCombatWeapon *pActiveWeapon = GetActiveWeapon();
-	for (int i=0; i<MAX_WEAPONS; ++i) 
+	for (int i=0; i<MAX_WEAPONS; ++i)
 	{
 		CBaseCombatWeapon *pWeapon = m_hMyWeapons[i];
 		if (!pWeapon)
@@ -1851,15 +1836,15 @@ void CBaseCombatCharacter::Weapon_DropAll( bool bDisallowWeaponPickup )
 		// HACK: This hack is required to allow weapons to be disintegrated
 		// in the citadel weapon-strip scene
 		// Make them not pick-uppable again. This also has the effect of allowing weapons
-		// to collide with triggers. 
+		// to collide with triggers.
 		if ( bDisallowWeaponPickup )
 		{
 			pWeapon->RemoveSolidFlags( FSOLID_TRIGGER );
-			
+
 			IPhysicsObject *pObj = pWeapon->VPhysicsGetObject();
-			
+
 			if ( pObj != NULL )
-			{	
+			{
 				pObj->SetGameFlags( FVPHYSICS_NO_PLAYER_PICKUP );
 			}
 		}
@@ -1881,7 +1866,7 @@ void CBaseCombatCharacter::Weapon_DropAll( bool bDisallowWeaponPickup )
 		// HACK: This hack is required to allow weapons to be disintegrated
 		// in the citadel weapon-strip scene
 		// Make them not pick-uppable again. This also has the effect of allowing weapons
-		// to collide with triggers. 
+		// to collide with triggers.
 		if ( bDisallowWeaponPickup )
 		{
 			pActiveWeapon->RemoveSolidFlags( FSOLID_TRIGGER );
@@ -1889,7 +1874,7 @@ void CBaseCombatCharacter::Weapon_DropAll( bool bDisallowWeaponPickup )
 	}
 }
 
-	
+
 //-----------------------------------------------------------------------------
 // Purpose: Drop the active weapon, optionally throwing it at the given target position.
 // Input  : pWeapon - Weapon to drop/throw.
@@ -1971,7 +1956,7 @@ void CBaseCombatCharacter::Weapon_Drop( CBaseCombatWeapon *pWeapon, const Vector
 			iBIndex = LookupBone( "ValveBiped.Weapon_bone" );
 		}
 
-		if ( iBIndex != -1)  
+		if ( iBIndex != -1)
 		{
 			Vector origin;
 			QAngle angles;
@@ -1996,14 +1981,14 @@ void CBaseCombatCharacter::Weapon_Drop( CBaseCombatWeapon *pWeapon, const Vector
 			matrix3x4_t weaponMatrix;
 			ConcatTransforms( transform, rootInvLocal, weaponMatrix );
 			MatrixAngles( weaponMatrix, angles, origin );
-			
+
 			pWeapon->Teleport( &origin, &angles, NULL );
 		}
 		// Otherwise just set in front of me.
-		else 
+		else
 		{
 			Vector vFacingDir = BodyDirection2D();
-			vFacingDir = vFacingDir * 10.0; 
+			vFacingDir = vFacingDir * 10.0;
 			pWeapon->SetAbsOrigin( Weapon_ShootPosition() + vFacingDir );
 		}
 	}
@@ -2066,9 +2051,9 @@ void CBaseCombatCharacter::SetLightingOriginRelative( CBaseEntity *pLightingOrig
 void CBaseCombatCharacter::Weapon_Equip( CBaseCombatWeapon *pWeapon )
 {
 	// Add the weapon to my weapon inventory
-	for (int i=0;i<MAX_WEAPONS;i++) 
+	for (int i=0;i<MAX_WEAPONS;i++)
 	{
-		if (!m_hMyWeapons[i]) 
+		if (!m_hMyWeapons[i])
 		{
 			m_hMyWeapons.Set( i, pWeapon );
 			break;
@@ -2090,18 +2075,18 @@ void CBaseCombatCharacter::Weapon_Equip( CBaseCombatWeapon *pWeapon )
 			// !!!HACK - Don't give any ammo with the spawn equipment RPG in d3_c17_09. This is a chapter
 			// start and the map is way to easy if you start with 3 RPG rounds. It's fine if a player conserves
 			// them and uses them here, but it's not OK to start with enough ammo to bypass the snipers completely.
-			GiveAmmo( 0, pWeapon->m_iPrimaryAmmoType); 
+			GiveAmmo( 0, pWeapon->m_iPrimaryAmmoType);
 		}
 		else
 #endif // HL2_DLL
-		GiveAmmo(pWeapon->GetDefaultClip1(), pWeapon->m_iPrimaryAmmoType); 
+		GiveAmmo(pWeapon->GetDefaultClip1(), pWeapon->m_iPrimaryAmmoType);
 	}
 	// If default ammo given is greater than clip
 	// size, fill clips and give extra ammo
 	else if (pWeapon->GetDefaultClip1() >  pWeapon->GetMaxClip1() )
 	{
 		pWeapon->m_iClip1 = pWeapon->GetMaxClip1();
-		GiveAmmo( (pWeapon->GetDefaultClip1() - pWeapon->GetMaxClip1()), pWeapon->m_iPrimaryAmmoType); 
+		GiveAmmo( (pWeapon->GetDefaultClip1() - pWeapon->GetMaxClip1()), pWeapon->m_iPrimaryAmmoType);
 	}
 
 	// ----------------------
@@ -2110,14 +2095,14 @@ void CBaseCombatCharacter::Weapon_Equip( CBaseCombatWeapon *pWeapon )
 	// If gun doesn't use clips, just give ammo
 	if (pWeapon->GetMaxClip2() == -1)
 	{
-		GiveAmmo(pWeapon->GetDefaultClip2(), pWeapon->m_iSecondaryAmmoType); 
+		GiveAmmo(pWeapon->GetDefaultClip2(), pWeapon->m_iSecondaryAmmoType);
 	}
 	// If default ammo given is greater than clip
 	// size, fill clips and give extra ammo
 	else if ( pWeapon->GetDefaultClip2() > pWeapon->GetMaxClip2() )
 	{
 		pWeapon->m_iClip2 = pWeapon->GetMaxClip2();
-		GiveAmmo( (pWeapon->GetDefaultClip2() - pWeapon->GetMaxClip2()), pWeapon->m_iSecondaryAmmoType); 
+		GiveAmmo( (pWeapon->GetDefaultClip2() - pWeapon->GetMaxClip2()), pWeapon->m_iSecondaryAmmoType);
 	}
 
 	pWeapon->Equip( this );
@@ -2135,7 +2120,7 @@ void CBaseCombatCharacter::Weapon_Equip( CBaseCombatWeapon *pWeapon )
 		m_hActiveWeapon->RemoveEffects( EF_NODRAW );
 
 	}
-	
+
 	// Gotta do this *after* Equip because it may whack maxRange
 	if ( IsPlayer() == false )
 	{
@@ -2149,7 +2134,7 @@ void CBaseCombatCharacter::Weapon_Equip( CBaseCombatWeapon *pWeapon )
 
 	WeaponProficiency_t proficiency;
 	proficiency = CalcWeaponProficiency( pWeapon );
-	
+
 	if( weapon_showproficiency.GetBool() != 0 )
 	{
 		Msg("%s equipped with %s, proficiency is %s\n", GetClassname(), pWeapon->GetClassname(), GetWeaponProficiencyName( proficiency ) );
@@ -2168,7 +2153,7 @@ void CBaseCombatCharacter::Weapon_Equip( CBaseCombatWeapon *pWeapon )
 bool CBaseCombatCharacter::Weapon_EquipAmmoOnly( CBaseCombatWeapon *pWeapon )
 {
 	// Check for duplicates
-	for (int i=0;i<MAX_WEAPONS;i++) 
+	for (int i=0;i<MAX_WEAPONS;i++)
 	{
 		if ( m_hMyWeapons[i].Get() && FClassnameIs(m_hMyWeapons[i], pWeapon->GetClassname()) )
 		{
@@ -2176,9 +2161,9 @@ bool CBaseCombatCharacter::Weapon_EquipAmmoOnly( CBaseCombatWeapon *pWeapon )
 			int	primaryGiven	= (pWeapon->UsesClipsForAmmo1()) ? pWeapon->m_iClip1 : pWeapon->GetPrimaryAmmoCount();
 			int secondaryGiven	= (pWeapon->UsesClipsForAmmo2()) ? pWeapon->m_iClip2 : pWeapon->GetSecondaryAmmoCount();
 
-			int takenPrimary   = GiveAmmo( primaryGiven, pWeapon->m_iPrimaryAmmoType); 
-			int takenSecondary = GiveAmmo( secondaryGiven, pWeapon->m_iSecondaryAmmoType); 
-			
+			int takenPrimary   = GiveAmmo( primaryGiven, pWeapon->m_iPrimaryAmmoType);
+			int takenSecondary = GiveAmmo( secondaryGiven, pWeapon->m_iSecondaryAmmoType);
+
 			if( pWeapon->UsesClipsForAmmo1() )
 			{
 				pWeapon->m_iClip1 -= takenPrimary;
@@ -2196,11 +2181,11 @@ bool CBaseCombatCharacter::Weapon_EquipAmmoOnly( CBaseCombatWeapon *pWeapon )
 			{
 				pWeapon->SetSecondaryAmmoCount( pWeapon->GetSecondaryAmmoCount() - takenSecondary );
 			}
-			
+
 			//Only succeed if we've taken ammo from the weapon
 			if ( takenPrimary > 0 || takenSecondary > 0 )
 				return true;
-			
+
 			return false;
 		}
 	}
@@ -2243,7 +2228,7 @@ CBaseCombatWeapon *CBaseCombatCharacter::Weapon_GetSlot( int slot ) const
 				return m_hMyWeapons[i];
 		}
 	}
-	
+
 	return NULL;
 }
 
@@ -2347,7 +2332,7 @@ int CBaseCombatCharacter::TakeHealth (float flHealth, int bitsDamageType)
 {
 	if (!m_takedamage)
 		return 0;
-	
+
 	return BaseClass::TakeHealth(flHealth, bitsDamageType);
 }
 
@@ -2420,7 +2405,7 @@ int CBaseCombatCharacter::OnTakeDamage( const CTakeDamageInfo &info )
 			{
 				pPhysics->EnableCollisions( false );
 			}
-			
+
 			bool bGibbed = false;
 
 			Event_Killed( info );
@@ -2430,7 +2415,7 @@ int CBaseCombatCharacter::OnTakeDamage( const CTakeDamageInfo &info )
 			{
 				bGibbed = Event_Gibbed( info );
 			}
-			
+
 			if ( bGibbed == false )
 			{
 				Event_Dying( info );
@@ -2441,7 +2426,7 @@ int CBaseCombatCharacter::OnTakeDamage( const CTakeDamageInfo &info )
 
 	case LIFE_DYING:
 		return OnTakeDamage_Dying( info );
-	
+
 	default:
 	case LIFE_DEAD:
 		retVal = OnTakeDamage_Dead( info );
@@ -2512,7 +2497,7 @@ int CBaseCombatCharacter::OnTakeDamage_Dead( const CTakeDamageInfo &info )
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: Sets vBodyDir to the body direction (2D) of the combat character.  
+// Purpose: Sets vBodyDir to the body direction (2D) of the combat character.
 //			Used as NPC's and players extract facing direction differently
 // Input  :
 // Output :
@@ -2585,9 +2570,9 @@ void CBaseCombatCharacter::AddClassRelationship ( Class_T class_type, Dispositio
 {
 	// First check to see if a relationship has already been declared for this class
 	// If so, update it with the new relationship
-	for (int i=m_Relationship.Count()-1;i >= 0;i--) 
+	for (int i=m_Relationship.Count()-1;i >= 0;i--)
 	{
-		if (m_Relationship[i].classType == class_type) 
+		if (m_Relationship[i].classType == class_type)
 		{
 			m_Relationship[i].disposition = disposition;
 			if ( priority != DEF_RELATIONSHIP_PRIORITY )
@@ -2613,9 +2598,9 @@ void CBaseCombatCharacter::AddEntityRelationship ( CBaseEntity* pEntity, Disposi
 {
 	// First check to see if a relationship has already been declared for this entity
 	// If so, update it with the new relationship
-	for (int i=m_Relationship.Count()-1;i >= 0;i--) 
+	for (int i=m_Relationship.Count()-1;i >= 0;i--)
 	{
-		if (m_Relationship[i].entity == pEntity) 
+		if (m_Relationship[i].entity == pEntity)
 		{
 			m_Relationship[i].disposition	= disposition;
 			if ( priority != DEF_RELATIONSHIP_PRIORITY )
@@ -2640,7 +2625,7 @@ void CBaseCombatCharacter::AddEntityRelationship ( CBaseEntity* pEntity, Disposi
 bool CBaseCombatCharacter::RemoveEntityRelationship( CBaseEntity *pEntity )
 {
 	// Find the entity in our list, if it exists
-	for ( int i = m_Relationship.Count()-1; i >= 0; i-- ) 
+	for ( int i = m_Relationship.Count()-1; i >= 0; i-- )
 	{
 		if ( m_Relationship[i].entity == pEntity )
 		{
@@ -2707,15 +2692,15 @@ Relationship_t *CBaseCombatCharacter::FindEntityRelationship( CBaseEntity *pTarg
 {
 	if ( !pTarget )
 	{
-		static Relationship_t dummy; 
+		static Relationship_t dummy;
 		return &dummy;
 	}
 
 	// First check for specific relationship with this edict
 	int i;
-	for (i=0;i<m_Relationship.Count();i++) 
+	for (i=0;i<m_Relationship.Count();i++)
 	{
-		if (pTarget == (CBaseEntity *)m_Relationship[i].entity) 
+		if (pTarget == (CBaseEntity *)m_Relationship[i].entity)
 		{
 			return &m_Relationship[i];
 		}
@@ -2724,9 +2709,9 @@ Relationship_t *CBaseCombatCharacter::FindEntityRelationship( CBaseEntity *pTarg
 	if (pTarget->Classify() != CLASS_NONE)
 	{
 		// Then check for relationship with this edict's class
-		for (i=0;i<m_Relationship.Count();i++) 
+		for (i=0;i<m_Relationship.Count();i++)
 		{
-			if (pTarget->Classify() == m_Relationship[i].classType) 
+			if (pTarget->Classify() == m_Relationship[i].classType)
 			{
 				return &m_Relationship[i];
 			}
@@ -2767,9 +2752,9 @@ Vector CBaseCombatCharacter::Weapon_ShootPosition( )
 
 	AngleVectors( GetAbsAngles(), &forward, &right, &up );
 
-	Vector vecSrc = GetAbsOrigin() 
-					+ forward * m_HackedGunPos.y 
-					+ right * m_HackedGunPos.x 
+	Vector vecSrc = GetAbsOrigin()
+					+ forward * m_HackedGunPos.y
+					+ right * m_HackedGunPos.x
 					+ up * m_HackedGunPos.z;
 
 	return vecSrc;
@@ -2824,8 +2809,8 @@ bool CBaseCombatCharacter::Weapon_IsOnGround( CBaseCombatWeapon *pWeapon )
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
-// Input  : &range - 
+// Purpose:
+// Input  : &range -
 // Output : CBaseEntity
 //-----------------------------------------------------------------------------
 CBaseEntity *CBaseCombatCharacter::Weapon_FindUsable( const Vector &range )
@@ -2911,7 +2896,7 @@ CBaseEntity *CBaseCombatCharacter::Weapon_FindUsable( const Vector &range )
 			{
 				continue;
 			}
-			else if (fCurDist > fBestDist ) 
+			else if (fCurDist > fBestDist )
 			{
 				continue;
 			}
@@ -2944,7 +2929,7 @@ CBaseEntity *CBaseCombatCharacter::Weapon_FindUsable( const Vector &range )
 
 	if( pBestWeapon )
 	{
-		// Lock this weapon for my exclusive use. Lock it for just a couple of seconds because my AI 
+		// Lock this weapon for my exclusive use. Lock it for just a couple of seconds because my AI
 		// might not actually be able to go pick it up right now.
 		pBestWeapon->Lock( 2.0, this );
 	}
@@ -3058,7 +3043,7 @@ void CBaseCombatCharacter::ApplyStressDamage( IPhysicsObject *pPhysics, bool bRe
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
+// Purpose:
 // Output : const impactdamagetable_t
 //-----------------------------------------------------------------------------
 const impactdamagetable_t &CBaseCombatCharacter::GetPhysicsImpactDamageTable( void )
@@ -3069,8 +3054,8 @@ const impactdamagetable_t &CBaseCombatCharacter::GetPhysicsImpactDamageTable( vo
 // how much to amplify impact forces
 // This is to account for the ragdolls responding differently than
 // the shadow objects.  Also this makes the impacts more dramatic.
-ConVar	phys_impactforcescale( "phys_impactforcescale", "1.0" ); 
-ConVar	phys_upimpactforcescale( "phys_upimpactforcescale", "0.375" ); 
+ConVar	phys_impactforcescale( "phys_impactforcescale", "1.0" );
+ConVar	phys_upimpactforcescale( "phys_upimpactforcescale", "0.375" );
 
 void CBaseCombatCharacter::VPhysicsShadowCollision( int index, gamevcollisionevent_t *pEvent )
 {
@@ -3086,10 +3071,10 @@ void CBaseCombatCharacter::VPhysicsShadowCollision( int index, gamevcollisioneve
 
 	if ( pOther->GetMoveType() != MOVETYPE_VPHYSICS )
 		return;
-	
+
 	if ( !pOtherPhysics->IsMoveable() )
 		return;
-	
+
 	if ( pOther == GetGroundEntity() )
 		return;
 
@@ -3111,15 +3096,15 @@ void CBaseCombatCharacter::VPhysicsShadowCollision( int index, gamevcollisioneve
 	float damage = 0;
 
 	damage = CalculatePhysicsImpactDamage( index, pEvent, GetPhysicsImpactDamageTable(), m_impactEnergyScale, false, damageType );
-	
+
 	if ( damage <= 0 )
 		return;
-	
+
 	// NOTE: We really need some rotational motion for some of these collisions.
 	// REVISIT: Maybe resolve this collision on death with a different (not approximately infinite like AABB tensor)
 	// inertia tensor to get torque?
 	Vector damageForce = pEvent->postVelocity[index] * pEvent->pObjects[index]->GetMass() * phys_impactforcescale.GetFloat();
-	
+
 	IServerVehicle *vehicleOther = pOther->GetServerVehicle();
 	if ( vehicleOther )
 	{
@@ -3166,12 +3151,12 @@ void CBaseCombatCharacter::VPhysicsShadowCollision( int index, gamevcollisioneve
 
 
 //-----------------------------------------------------------------------------
-// Purpose: this entity is exploding, or otherwise needs to inflict damage upon 
-//			entities within a certain range.  only damage ents that can clearly 
+// Purpose: this entity is exploding, or otherwise needs to inflict damage upon
+//			entities within a certain range.  only damage ents that can clearly
 //			be seen by the explosion!
 // Input  :
 // Output :
-//-----------------------------------------------------------------------------	
+//-----------------------------------------------------------------------------
 void RadiusDamage( const CTakeDamageInfo &info, const Vector &vecSrc, float flRadius, int iClassIgnore, CBaseEntity *pEntityIgnore )
 {
 	// NOTE: I did this this way so I wouldn't have to change a whole bunch of
@@ -3195,7 +3180,7 @@ void RadiusDamage( const CTakeDamageInfo &info, const Vector &vecSrc, float flRa
 
 //-----------------------------------------------------------------------------
 // Purpose: Change active weapon and notify derived classes
-//			
+//
 //-----------------------------------------------------------------------------
 void CBaseCombatCharacter::SetActiveWeapon( CBaseCombatWeapon *pNewWeapon )
 {
@@ -3227,33 +3212,6 @@ float CBaseCombatCharacter::GetSpreadBias( CBaseCombatWeapon *pWeapon, CBaseEnti
 	return 1.0;
 }
 
-#ifdef GLOWS_ENABLE
-//-----------------------------------------------------------------------------
-// Purpose: 
-//-----------------------------------------------------------------------------
-void CBaseCombatCharacter::AddGlowEffect( void )
-{
-	SetTransmitState( FL_EDICT_ALWAYS );
-	m_bGlowEnabled.Set( true );
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: 
-//-----------------------------------------------------------------------------
-void CBaseCombatCharacter::RemoveGlowEffect( void )
-{
-	m_bGlowEnabled.Set( false );
-}
-
-//-----------------------------------------------------------------------------
-// Purpose: 
-//-----------------------------------------------------------------------------
-bool CBaseCombatCharacter::IsGlowEffectActive( void )
-{
-	return m_bGlowEnabled;
-}
-#endif // GLOWS_ENABLE
-
 //-----------------------------------------------------------------------------
 // Assume everyone is average with every weapon. Override this to make exceptions.
 //-----------------------------------------------------------------------------
@@ -3263,7 +3221,7 @@ WeaponProficiency_t CBaseCombatCharacter::CalcWeaponProficiency( CBaseCombatWeap
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
+// Purpose:
 //-----------------------------------------------------------------------------
 #define MAX_MISS_CANDIDATES 16
 CBaseEntity *CBaseCombatCharacter::FindMissTarget( void )
@@ -3291,8 +3249,8 @@ CBaseEntity *CBaseCombatCharacter::FindMissTarget( void )
 			break;
 
 		//See if it's a good target candidate
-		if ( FClassnameIs( pEnts[i], "prop_dynamic" ) || 
-			 FClassnameIs( pEnts[i], "prop_physics" ) || 
+		if ( FClassnameIs( pEnts[i], "prop_dynamic" ) ||
+			 FClassnameIs( pEnts[i], "prop_physics" ) ||
 			 FClassnameIs( pEnts[i], "physics_prop" ) )
 		{
 			pMissCandidates[numMissCandidates++] = pEnts[i];
@@ -3470,7 +3428,7 @@ bool CBaseCombatCharacter::GetFogParams( fogparams_t *fog ) const
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: Invoke this to update our last known nav area 
+// Purpose: Invoke this to update our last known nav area
 // (since there is no think method chained to CBaseCombatCharacter)
 //-----------------------------------------------------------------------------
 void CBaseCombatCharacter::UpdateLastKnownArea( void )
@@ -3525,7 +3483,7 @@ void CBaseCombatCharacter::UpdateLastKnownArea( void )
 
 
 //-----------------------------------------------------------------------------
-// Purpose: Return true if we can use (walk through) the given area 
+// Purpose: Return true if we can use (walk through) the given area
 //-----------------------------------------------------------------------------
 bool CBaseCombatCharacter::IsAreaTraversable( const CNavArea *area ) const
 {
@@ -3539,7 +3497,7 @@ bool CBaseCombatCharacter::IsAreaTraversable( const CNavArea *area ) const
 void CBaseCombatCharacter::ClearLastKnownArea( void )
 {
 	OnNavAreaChanged( NULL, m_lastNavArea );
-	
+
 	if ( m_lastNavArea )
 	{
 		m_lastNavArea->DecrementPlayerCount( m_registeredNavTeam, entindex() );
@@ -3569,10 +3527,6 @@ void CBaseCombatCharacter::ChangeTeam( int iTeamNum )
 {
 	// old team member no longer in the nav mesh
 	ClearLastKnownArea();
-
-#ifdef GLOWS_ENABLE
-	RemoveGlowEffect();
-#endif // GLOWS_ENABLE
 
 	BaseClass::ChangeTeam( iTeamNum );
 }

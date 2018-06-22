@@ -122,7 +122,7 @@ void CInfoLightingRelative::SetTransmit( CCheckTransmitInfo *pInfo, bool bAlways
 		return;
 
 	BaseClass::SetTransmit( pInfo, bAlways );
-	
+
 	// Force our constraint entity to be sent too.
 	if ( m_hLightingLandmark )
 	{
@@ -238,7 +238,7 @@ IMPLEMENT_SERVERCLASS_ST(CBaseAnimating, DT_BaseAnimating)
 	SendPropFloat	( SENDINFO(m_flModelScale) ),
 
 	SendPropArray3  ( SENDINFO_ARRAY3(m_flPoseParameter), SendPropFloat(SENDINFO_ARRAY(m_flPoseParameter), ANIMATION_POSEPARAMETER_BITS, 0, 0.0f, 1.0f ) ),
-	
+
 	SendPropInt		( SENDINFO(m_nSequence), ANIMATION_SEQUENCE_BITS, SPROP_UNSIGNED ),
 	SendPropFloat	( SENDINFO(m_flPlaybackRate), ANIMATION_PLAYBACKRATE_BITS, SPROP_ROUNDUP, -4.0, 12.0f ), // NOTE: if this isn't a power of 2 than "1.0" can't be encoded correctly
 
@@ -260,6 +260,10 @@ IMPLEMENT_SERVERCLASS_ST(CBaseAnimating, DT_BaseAnimating)
 	SendPropFloat( SENDINFO( m_fadeMinDist ), 0, SPROP_NOSCALE ),
 	SendPropFloat( SENDINFO( m_fadeMaxDist ), 0, SPROP_NOSCALE ),
 	SendPropFloat( SENDINFO( m_flFadeScale ), 0, SPROP_NOSCALE ),
+
+#ifdef GLOWS_ENABLE
+	SendPropBool( SENDINFO( m_bGlowEnabled ) ),
+#endif // GLOWS_ENABLE
 
 END_SEND_TABLE()
 
@@ -288,6 +292,10 @@ CBaseAnimating::CBaseAnimating()
 	m_fadeMaxDist = 0;
 	m_flFadeScale = 0.0f;
 	m_fBoneCacheFlags = 0;
+
+#ifdef GLOWS_ENABLE
+	m_bGlowEnabled.Set( false );
+#endif // GLOWS_ENABLE
 }
 
 CBaseAnimating::~CBaseAnimating()
@@ -297,6 +305,55 @@ CBaseAnimating::~CBaseAnimating()
 	UnlockStudioHdr();
 	delete m_pStudioHdr;
 }
+
+#ifdef GLOWS_ENABLE
+void CBaseAnimating::UpdateOnRemove()
+{
+	RemoveGlowEffect();
+
+	BaseClass::UpdateOnRemove();
+}
+
+void CBaseAnimating::ChangeTeam( int team )
+{
+	RemoveGlowEffect();
+
+	BaseClass::ChangeTeam( team );
+}
+
+void CBaseAnimating::Event_Killed( const CTakeDamageInfo &info )
+{
+	RemoveGlowEffect();
+
+	BaseClass::Event_Killed( info );
+}
+
+//-----------------------------------------------------------------------------
+// Purpose:
+//-----------------------------------------------------------------------------
+void CBaseAnimating::AddGlowEffect( void )
+{
+	SetTransmitState( FL_EDICT_ALWAYS );
+	m_bGlowEnabled.Set( true );
+}
+
+//-----------------------------------------------------------------------------
+// Purpose:
+//-----------------------------------------------------------------------------
+void CBaseAnimating::RemoveGlowEffect( void )
+{
+	m_bGlowEnabled.Set( false );
+}
+
+//-----------------------------------------------------------------------------
+// Purpose:
+//-----------------------------------------------------------------------------
+bool CBaseAnimating::IsGlowEffectActive( void )
+{
+	return m_bGlowEnabled;
+}
+#endif
+
 
 void CBaseAnimating::Precache()
 {
@@ -319,8 +376,8 @@ void CBaseAnimating::Activate()
 
 	// Scaled physics objects (re)create their physics here
 	if ( m_flModelScale != 1.0f && VPhysicsGetObject() )
-	{	
-		// sanity check to make sure 'm_flModelScale' is in sync with the 
+	{
+		// sanity check to make sure 'm_flModelScale' is in sync with the
 		Assert( m_flModelScale > 0.0f );
 
 		UTIL_CreateScaledPhysObject( this, m_flModelScale );
@@ -338,7 +395,7 @@ void CBaseAnimating::SetTransmit( CCheckTransmitInfo *pInfo, bool bAlways )
 		return;
 
 	BaseClass::SetTransmit( pInfo, bAlways );
-	
+
 	// Force our lighting entities to be sent too.
 	if ( m_hLightingOrigin )
 	{
@@ -395,7 +452,7 @@ void CBaseAnimating::UseClientSideAnimation()
 #define MAX_ANIMTIME_INTERVAL 0.2f
 
 //-----------------------------------------------------------------------------
-// Purpose: 
+// Purpose:
 // Output : float
 //-----------------------------------------------------------------------------
 float CBaseAnimating::GetAnimTimeInterval( void ) const
@@ -416,12 +473,12 @@ float CBaseAnimating::GetAnimTimeInterval( void ) const
 
 
 //-----------------------------------------------------------------------------
-// Purpose: 
+// Purpose:
 //-----------------------------------------------------------------------------
 void CBaseAnimating::StudioFrameAdvanceInternal( CStudioHdr *pStudioHdr, float flCycleDelta )
 {
 	float flNewCycle = GetCycle() + flCycleDelta;
-	if (flNewCycle < 0.0 || flNewCycle >= 1.0) 
+	if (flNewCycle < 0.0 || flNewCycle >= 1.0)
 	{
 		if (flNewCycle >= 1.0f)
 		{
@@ -447,11 +504,11 @@ void CBaseAnimating::StudioFrameAdvanceInternal( CStudioHdr *pStudioHdr, float f
 
 	/*
 	if (!IsPlayer())
-		Msg("%s %6.3f : %6.3f %6.3f (%.3f) %.3f\n", 
-			GetClassname(), gpGlobals->curtime, 
+		Msg("%s %6.3f : %6.3f %6.3f (%.3f) %.3f\n",
+			GetClassname(), gpGlobals->curtime,
 			m_flAnimTime.Get(), m_flPrevAnimTime, flInterval, GetCycle() );
 	*/
- 
+
 	m_flGroundSpeed = GetSequenceGroundSpeed( pStudioHdr, GetSequence() ) * GetModelScale();
 
 	// Msg("%s : %s : %5.1f\n", GetClassname(), GetSequenceName( GetSequence() ), GetCycle() );
@@ -470,7 +527,7 @@ void CBaseAnimating::InvalidateBoneCacheIfOlderThan( float deltaTime )
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
+// Purpose:
 //-----------------------------------------------------------------------------
 void CBaseAnimating::StudioFrameAdvanceManual( float flInterval )
 {
@@ -558,7 +615,7 @@ void CBaseAnimating::SetLightingOriginRelative( string_t strLightingOriginRelati
 			}
 			else
 			{
-				DevWarning( "%s: Specified entity '%s' must be a info_lighting_relative!\n", 
+				DevWarning( "%s: Specified entity '%s' must be a info_lighting_relative!\n",
 					pLightingOrigin->GetClassname(), pLightingOrigin->GetEntityName().ToCStr() );
 			}
 			return;
@@ -588,7 +645,7 @@ void CBaseAnimating::SetLightingOrigin( string_t strLightingOrigin )
 			DevWarning( "%s: Could not find lighting origin entity named '%s'!\n", GetClassname(), STRING( strLightingOrigin ) );
 			return;
 		}
-		else 
+		else
 		{
 			SetLightingOrigin( pLightingOrigin );
 		}
@@ -600,22 +657,22 @@ void CBaseAnimating::SetLightingOrigin( string_t strLightingOrigin )
 
 
 //-----------------------------------------------------------------------------
-// Purpose: 
-// Input  : &inputdata - 
+// Purpose:
+// Input  : &inputdata -
 //-----------------------------------------------------------------------------
 void CBaseAnimating::InputSetLightingOriginRelative( inputdata_t &inputdata )
-{ 
+{
 	// Find our specified target
 	string_t strLightingOriginRelative = MAKE_STRING( inputdata.value.String() );
 	SetLightingOriginRelative( strLightingOriginRelative );
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
-// Input  : &inputdata - 
+// Purpose:
+// Input  : &inputdata -
 //-----------------------------------------------------------------------------
 void CBaseAnimating::InputSetLightingOrigin( inputdata_t &inputdata )
-{ 
+{
 	// Find our specified target
 	string_t strLightingOrigin = MAKE_STRING( inputdata.value.String() );
 	SetLightingOrigin( strLightingOrigin );
@@ -734,16 +791,16 @@ KeyValues *CBaseAnimating::GetSequenceKeyValues( int iSequence )
 
 
 //-----------------------------------------------------------------------------
-// Purpose: 
+// Purpose:
 //
-// Input  : iSequence - 
+// Input  : iSequence -
 //
-// Output : float - 
+// Output : float -
 //-----------------------------------------------------------------------------
 float CBaseAnimating::GetSequenceMoveYaw( int iSequence )
 {
 	Vector				vecReturn;
-	
+
 	AssertMsg( GetModelPtr(), "GetModelPtr NULL. %s", STRING(GetEntityName()) ? STRING(GetEntityName()) : "" );
 	::GetSequenceLinearMotion( GetModelPtr(), iSequence, GetPoseParameterArray(), &vecReturn );
 
@@ -756,26 +813,26 @@ float CBaseAnimating::GetSequenceMoveYaw( int iSequence )
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
+// Purpose:
 //
-// Input  : iSequence - 
+// Input  : iSequence -
 //
 // Output : float
 //-----------------------------------------------------------------------------
 float CBaseAnimating::GetSequenceMoveDist( CStudioHdr *pStudioHdr, int iSequence )
 {
 	Vector				vecReturn;
-	
+
 	::GetSequenceLinearMotion( pStudioHdr, iSequence, GetPoseParameterArray(), &vecReturn );
 
 	return vecReturn.Length();
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
+// Purpose:
 //
-// Input  : iSequence - 
-//			*pVec - 
+// Input  : iSequence -
+//			*pVec -
 //
 //-----------------------------------------------------------------------------
 void CBaseAnimating::GetSequenceLinearMotion( int iSequence, Vector *pVec )
@@ -785,9 +842,9 @@ void CBaseAnimating::GetSequenceLinearMotion( int iSequence, Vector *pVec )
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
+// Purpose:
 //
-// Input  : iSequence - 
+// Input  : iSequence -
 //
 // Output : char
 //-----------------------------------------------------------------------------
@@ -804,9 +861,9 @@ const char *CBaseAnimating::GetSequenceName( int iSequence )
 	return ::GetSequenceName( GetModelPtr(), iSequence );
 }
 //-----------------------------------------------------------------------------
-// Purpose: 
+// Purpose:
 //
-// Input  : iSequence - 
+// Input  : iSequence -
 //
 // Output : char
 //-----------------------------------------------------------------------------
@@ -832,12 +889,12 @@ const char *CBaseAnimating::GetSequenceActivityName( int iSequence )
 bool CBaseAnimating::BecomeRagdollOnClient( const Vector &force )
 {
 	// If this character has a ragdoll animation, turn it over to the physics system
-	if ( CanBecomeRagdoll() ) 
+	if ( CanBecomeRagdoll() )
 	{
 		VPhysicsDestroyObject();
 		AddSolidFlags( FSOLID_NOT_SOLID );
 		m_nRenderFX = kRenderFxRagdoll;
-		
+
 		// Have to do this dance because m_vecForce is a network vector
 		// and can't be sent to ClampRagdollForce as a Vector *
 		Vector vecClampedForce;
@@ -851,7 +908,7 @@ bool CBaseAnimating::BecomeRagdollOnClient( const Vector &force )
 		SetMoveType( MOVETYPE_NONE );
 		//UTIL_SetSize( this, vec3_origin, vec3_origin );
 		SetThink( NULL );
-	
+
 		SetNextThink( gpGlobals->curtime + 2.0f );
 		//If we're here, then we can vanish safely
 		SetThink( &CBaseEntity::SUB_Remove );
@@ -874,7 +931,7 @@ bool CBaseAnimating::IsRagdoll()
 	return m_nRenderFX == kRenderFxRagdoll;
 }
 
-bool CBaseAnimating::CanBecomeRagdoll( void ) 
+bool CBaseAnimating::CanBecomeRagdoll( void )
 {
 	MDLCACHE_CRITICAL_SECTION();
 	int ragdollSequence = SelectWeightedSequence( ACT_DIERAGDOLL );
@@ -882,7 +939,7 @@ bool CBaseAnimating::CanBecomeRagdoll( void )
 	//Can't cause we don't have a ragdoll sequence.
 	if ( ragdollSequence == ACTIVITY_NOT_AVAILABLE )
 		 return false;
-	
+
 	if ( GetFlags() & FL_TRANSRAGDOLL )
 		 return false;
 
@@ -1092,7 +1149,7 @@ void CBaseAnimating::DispatchAnimEvents ( CBaseAnimating *eventHandler )
 		return;
 	}
 
-	// look from when it last checked to some short time in the future	
+	// look from when it last checked to some short time in the future
 	float flCycleRate = GetSequenceCycleRate( GetSequence() ) * m_flPlaybackRate;
 	float flStart = m_flLastEventCheck;
 	float flEnd = GetCycle();
@@ -1129,11 +1186,11 @@ void CBaseAnimating::DispatchAnimEvents ( CBaseAnimating *eventHandler )
 		/*
 		if (m_debugOverlays & OVERLAY_NPC_SELECTED_BIT)
 		{
-			Msg( "dispatch %i (%i) cycle %f event cycle %f cyclerate %f\n", 
-				(int)(index - 1), 
-				(int)event.event, 
-				(float)GetCycle(), 
-				(float)event.cycle, 
+			Msg( "dispatch %i (%i) cycle %f event cycle %f cyclerate %f\n",
+				(int)(index - 1),
+				(int)event.event,
+				(float)GetCycle(),
+				(float)event.cycle,
 				(float)flCycleRate );
 		}
 		*/
@@ -1141,9 +1198,9 @@ void CBaseAnimating::DispatchAnimEvents ( CBaseAnimating *eventHandler )
 
 		// FAILSAFE:
 		// If HandleAnimEvent has somehow reset my internal pointer
-		// to CStudioHdr to something other than it was when we entered 
+		// to CStudioHdr to something other than it was when we entered
 		// this function, we will crash on the next call to GetAnimationEvent
-		// because pstudiohdr no longer points at something valid. 
+		// because pstudiohdr no longer points at something valid.
 		// So, catch this case, complain vigorously, and bail out of
 		// the loop.
 		CStudioHdr *pNowStudioHdr = GetModelPtr();
@@ -1157,7 +1214,7 @@ void CBaseAnimating::DispatchAnimEvents ( CBaseAnimating *eventHandler )
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
+// Purpose:
 //-----------------------------------------------------------------------------
 void CBaseAnimating::HandleAnimEvent( animevent_t *pEvent )
 {
@@ -1196,7 +1253,7 @@ void CBaseAnimating::HandleAnimEvent( animevent_t *pEvent )
 					hDustTrail->m_SpawnRadius = 3;    // Each particle randomly offset from the center up to this many units
 					hDustTrail->m_MinSpeed = 4;    // u/sec
 					hDustTrail->m_MaxSpeed = 10;    // u/sec
-					hDustTrail->m_Opacity = 0.5f;  
+					hDustTrail->m_Opacity = 0.5f;
 					hDustTrail->SetLifetime(flDuration);  // Lifetime of the spawner, in seconds
 					hDustTrail->m_StopEmitTime = gpGlobals->curtime + flDuration;
 					hDustTrail->SetParent( this, LookupAttachment( szAttachment ) );
@@ -1361,7 +1418,7 @@ bool CBaseAnimating::HasPoseParameter( int iSequence, int iParameter )
 	}
 
 	mstudioseqdesc_t &seqdesc = pstudiohdr->pSeqdesc( iSequence );
-	if (pstudiohdr->GetSharedPoseParameter( iSequence, seqdesc.paramindex[0] ) == iParameter || 
+	if (pstudiohdr->GetSharedPoseParameter( iSequence, seqdesc.paramindex[0] ) == iParameter ||
 		pstudiohdr->GetSharedPoseParameter( iSequence, seqdesc.paramindex[1] ) == iParameter)
 	{
 		return true;
@@ -1376,7 +1433,7 @@ bool CBaseAnimating::HasPoseParameter( int iSequence, int iParameter )
 // GetPoseParameter(const char*) every time you want to adjust
 // an animation.
 //
-// Make sure to call BaseClass::PopulatePoseParameters() at 
+// Make sure to call BaseClass::PopulatePoseParameters() at
 // the *bottom* of your function.
 //=========================================================
 void	CBaseAnimating::PopulatePoseParameters( void )
@@ -1445,7 +1502,7 @@ void CBaseAnimating::GetBonePosition ( int iBone, Vector &origin, QAngle &angles
 
 	matrix3x4_t bonetoworld;
 	GetBoneTransform( iBone, bonetoworld );
-	
+
 	MatrixAngles( bonetoworld, angles, origin );
 }
 
@@ -1481,7 +1538,7 @@ void CBaseAnimating::GetBoneTransform( int iBone, matrix3x4_t &pBoneToWorld )
 	}
 
 	Assert( pmatrix );
-	
+
 	// FIXME
 	MatrixCopy( *pmatrix, pBoneToWorld );
 }
@@ -1595,8 +1652,8 @@ void CBaseAnimating::UpdateStepOrigin()
 // Purpose: Returns the origin to use for model rendering
 //-----------------------------------------------------------------------------
 
-Vector CBaseAnimating::GetStepOrigin( void ) const 
-{ 
+Vector CBaseAnimating::GetStepOrigin( void ) const
+{
 	Vector tmp = GetLocalOrigin();
 	tmp.z += m_flEstIkOffset;
 	return tmp;
@@ -1614,7 +1671,7 @@ QAngle CBaseAnimating::GetStepAngles( void ) const
 
 //-----------------------------------------------------------------------------
 // Purpose: Find IK collisions with world
-// Input  : 
+// Input  :
 // Output :	fills out m_pIk targets, calcs floor offset for rendering
 //-----------------------------------------------------------------------------
 
@@ -1719,10 +1776,10 @@ void CBaseAnimating::Teleport( const Vector *newPosition, const QAngle *newAngle
 // Purpose: build matrices first from the parent, then from the passed in arrays if the bone doesn't exist on the parent
 //-----------------------------------------------------------------------------
 
-void CBaseAnimating::BuildMatricesWithBoneMerge( 
+void CBaseAnimating::BuildMatricesWithBoneMerge(
 	const CStudioHdr *pStudioHdr,
-	const QAngle& angles, 
-	const Vector& origin, 
+	const QAngle& angles,
+	const Vector& origin,
 	const Vector pos[MAXSTUDIOBONES],
 	const Quaternion q[MAXSTUDIOBONES],
 	matrix3x4_t bonetoworld[MAXSTUDIOBONES],
@@ -1757,11 +1814,11 @@ void CBaseAnimating::BuildMatricesWithBoneMerge(
 			matrix3x4_t bonematrix;
 			QuaternionMatrix( q[i], pos[i], bonematrix );
 
-			if (pbones[i].parent == -1) 
+			if (pbones[i].parent == -1)
 			{
 				ConcatTransforms (rotationmatrix, bonematrix, bonetoworld[i]);
-			} 
-			else 
+			}
+			else
 			{
 				ConcatTransforms (bonetoworld[pbones[i].parent], bonematrix, bonetoworld[i]);
 			}
@@ -1779,16 +1836,16 @@ bool CBaseAnimating::CanSkipAnimation( void )
 {
 	if ( !sv_pvsskipanimation.GetBool() )
 		return false;
-		
+
 	CAI_BaseNPC *pNPC = MyNPCPointer();
 	if ( pNPC && !pNPC->HasCondition( COND_IN_PVS ) && ( m_fBoneCacheFlags & (BCF_NO_ANIMATION_SKIP | BCF_IS_IN_SPAWN) ) == false )
 	{
 		// If we have a player as a child, then we better setup our bones. If we don't,
-		// the PVS will be screwy. 
+		// the PVS will be screwy.
 		return !DoesHavePlayerChild();
 	}
 	else
-	{	
+	{
 		return false;
 	}
 }
@@ -1797,9 +1854,9 @@ bool CBaseAnimating::CanSkipAnimation( void )
 void CBaseAnimating::SetupBones( matrix3x4_t *pBoneToWorld, int boneMask )
 {
 	AUTO_LOCK( m_BoneSetupMutex );
-	
+
 	VPROF_BUDGET( "CBaseAnimating::SetupBones", VPROF_BUDGETGROUP_SERVER_ANIM );
-	
+
 	MDLCACHE_CRITICAL_SECTION();
 
 	AssertMsg( GetModelPtr(), "GetModelPtr NULL. %s", STRING(GetEntityName()) ? STRING(GetEntityName()) : "" );
@@ -1828,7 +1885,7 @@ void CBaseAnimating::SetupBones( matrix3x4_t *pBoneToWorld, int boneMask )
 		boneSetup.InitPose( pos, q );
 		// Msg( "%.03f : %s:%s not in pvs\n", gpGlobals->curtime, GetClassname(), GetEntityName().ToCStr() );
 	}
-	else 
+	else
 	{
 		if ( m_pIk )
 		{
@@ -1848,7 +1905,7 @@ void CBaseAnimating::SetupBones( matrix3x4_t *pBoneToWorld, int boneMask )
 			GetSkeleton( pStudioHdr, pos, q, boneMask );
 		}
 	}
-	
+
 	CBaseAnimating *pParent = dynamic_cast< CBaseAnimating* >( GetMoveParent() );
 	if ( pParent )
 	{
@@ -1856,16 +1913,16 @@ void CBaseAnimating::SetupBones( matrix3x4_t *pBoneToWorld, int boneMask )
 		CBoneCache *pParentCache = pParent->GetBoneCache();
 		if ( pParentCache )
 		{
-			BuildMatricesWithBoneMerge( 
-				pStudioHdr, 
-				GetAbsAngles(), 
-				adjOrigin, 
-				pos, 
-				q, 
-				pBoneToWorld, 
-				pParent, 
+			BuildMatricesWithBoneMerge(
+				pStudioHdr,
+				GetAbsAngles(),
+				adjOrigin,
+				pos,
+				q,
+				pBoneToWorld,
+				pParent,
 				pParentCache );
-			
+
 			RemoveEFlags( EFL_SETTING_UP_BONES );
 			if (ai_setupbones_debug.GetBool())
 			{
@@ -1875,12 +1932,12 @@ void CBaseAnimating::SetupBones( matrix3x4_t *pBoneToWorld, int boneMask )
 		}
 	}
 
-	Studio_BuildMatrices( 
-		pStudioHdr, 
-		GetAbsAngles(), 
-		adjOrigin, 
-		pos, 
-		q, 
+	Studio_BuildMatrices(
+		pStudioHdr,
+		GetAbsAngles(),
+		adjOrigin,
+		pos,
+		q,
 		-1,
 		GetModelScale(), // Scaling
 		pBoneToWorld,
@@ -1939,7 +1996,7 @@ int CBaseAnimating::LookupAttachment( const char *szName )
 // Output :	location and angles
 //-----------------------------------------------------------------------------
 bool CBaseAnimating::GetAttachment( const char *szName, Vector &absOrigin, QAngle &absAngles )
-{																
+{
 	return GetAttachment( LookupAttachment( szName ), absOrigin, absAngles );
 }
 
@@ -1987,7 +2044,7 @@ bool CBaseAnimating::GetAttachment( int iAttachment, matrix3x4_t &attachmentToWo
 	GetBoneTransform( iBone, bonetoworld );
 	if ( (pattachment.flags & ATTACHMENT_FLAG_WORLD_ALIGN) == 0 )
 	{
-		ConcatTransforms( bonetoworld, pattachment.local, attachmentToWorld ); 
+		ConcatTransforms( bonetoworld, pattachment.local, attachmentToWorld );
 	}
 	else
 	{
@@ -2022,7 +2079,7 @@ int CBaseAnimating::GetAttachmentBone( int iAttachment )
 // Output :	location and angles
 //-----------------------------------------------------------------------------
 bool CBaseAnimating::GetAttachment( const char *szName, Vector &absOrigin, Vector *forward, Vector *right, Vector *up )
-{																
+{
 	return GetAttachment( LookupAttachment( szName ), absOrigin, forward, right, up );
 }
 
@@ -2071,7 +2128,7 @@ bool CBaseAnimating::GetAttachmentLocal( int iAttachment, matrix3x4_t &attachmen
 	bool bRet = GetAttachment(iAttachment, attachmentToWorld);
 	matrix3x4_t worldToEntity;
 	MatrixInvert( EntityToWorldTransform(), worldToEntity );
-	ConcatTransforms( worldToEntity, attachmentToWorld, attachmentToLocal ); 
+	ConcatTransforms( worldToEntity, attachmentToWorld, attachmentToLocal );
 	return bRet;
 }
 
@@ -2147,7 +2204,7 @@ int CBaseAnimating::GetExitNode( int iSequence )
 	CStudioHdr *pstudiohdr = GetModelPtr();
 	if (! pstudiohdr)
 		return 0;
-	
+
 	return pstudiohdr->ExitNode( iSequence );
 }
 
@@ -2349,7 +2406,7 @@ void CBaseAnimating::SetSequenceBox( void )
 		// expand box for rotation
 		// find min / max for rotations
 		float yaw = GetLocalAngles().y * (M_PI / 180.0);
-		
+
 		Vector xvector, yvector;
 		xvector.x = cos(yaw);
 		xvector.y = sin(yaw);
@@ -2359,7 +2416,7 @@ void CBaseAnimating::SetSequenceBox( void )
 
 		bounds[0] = mins;
 		bounds[1] = maxs;
-		
+
 		Vector rmin( 9999, 9999, 9999 );
 		Vector rmax( -9999, -9999, -9999 );
 		Vector base, transformed;
@@ -2373,12 +2430,12 @@ void CBaseAnimating::SetSequenceBox( void )
 				for ( int k = 0; k <= 1; k++ )
 				{
 					base.z = bounds[k].z;
-					
+
 				// transform the point
 					transformed.x = xvector.x*base.x + yvector.x*base.y;
 					transformed.y = xvector.y*base.x + yvector.y*base.y;
 					transformed.z = base.z;
-					
+
 					for ( int l = 0; l < 3; l++ )
 					{
 						if (transformed[l] < rmin[l])
@@ -2407,7 +2464,7 @@ int CBaseAnimating::RegisterPrivateActivity( const char *pszActivityName )
 //			animation sequence for the specified activity. This probably means
 //			there's a typo in the model QC file, or the sequence is missing
 //			entirely.
-//			
+//
 //
 // Input  : iActivity - The activity that failed to resolve to a sequence.
 //
@@ -2554,7 +2611,7 @@ bool CBaseAnimating::GetIntervalMovement( float flIntervalUsed, bool &bMoveSeqFi
 		return false;
 
 	float flComputedCycleRate = GetSequenceCycleRate( GetSequence() );
-	
+
 	float flNextCycle = GetCycle() + flIntervalUsed * flComputedCycleRate * GetPlaybackRate();
 
 	if ((!m_bSequenceLoops) && flNextCycle > 1.0)
@@ -2643,8 +2700,8 @@ bool CBaseAnimating::HasMovement( int iSequence )
 
 
 //-----------------------------------------------------------------------------
-// Purpose: 
-// Input  : *szModelName - 
+// Purpose:
+// Input  : *szModelName -
 //-----------------------------------------------------------------------------
 void CBaseAnimating::SetModel( const char *szModelName )
 {
@@ -2654,7 +2711,7 @@ void CBaseAnimating::SetModel( const char *szModelName )
 	UnlockStudioHdr();
 	delete m_pStudioHdr;
 	m_pStudioHdr = NULL;
-	
+
 	if ( szModelName[0] )
 	{
 		int modelIndex = modelinfo->GetModelIndex( szModelName );
@@ -2675,12 +2732,12 @@ void CBaseAnimating::SetModel( const char *szModelName )
 
 	InitBoneControllers( );
 	SetSequence( 0 );
-	
+
 	PopulatePoseParameters();
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
+// Purpose:
 // Input  :
 //-----------------------------------------------------------------------------
 void CBaseAnimating::LockStudioHdr()
@@ -2809,7 +2866,7 @@ bool CBaseAnimating::TestCollision( const Ray_t &ray, unsigned int fContentsMask
 		pPhysObject->GetPosition( &vecPosition, &vecAngles );
 		const CPhysCollide *pScaledCollide = pPhysObject->GetCollide();
 		physcollision->TraceBox( ray, pScaledCollide, vecPosition, vecAngles, &tr );
-		
+
 		return tr.DidHit();
 	}
 
@@ -2863,7 +2920,7 @@ void CBaseAnimating::InitBoneControllers ( void ) // FIXME: rename
 	if (!pStudioHdr)
 		return;
 
-	int nBoneControllerCount = pStudioHdr->numbonecontrollers();	
+	int nBoneControllerCount = pStudioHdr->numbonecontrollers();
 	if ( nBoneControllerCount > NUM_BONECTRLS )
 	{
 		nBoneControllerCount = NUM_BONECTRLS;
@@ -2918,12 +2975,12 @@ float CBaseAnimating::GetBoneController ( int iController )
 }
 
 //------------------------------------------------------------------------------
-// Purpose : Returns velcocity of the NPC from it's animation.  
+// Purpose : Returns velcocity of the NPC from it's animation.
 //			 If physically simulated gets velocity from physics object
 // Input   :
 // Output  :
 //------------------------------------------------------------------------------
-void CBaseAnimating::GetVelocity(Vector *vVelocity, AngularImpulse *vAngVelocity) 
+void CBaseAnimating::GetVelocity(Vector *vVelocity, AngularImpulse *vAngVelocity)
 {
 	if ( GetMoveType() == MOVETYPE_VPHYSICS )
 	{
@@ -2984,11 +3041,11 @@ void CBaseAnimating::GetSkeleton( CStudioHdr *pStudioHdr, Vector pos[], Quaterni
 	boneSetup.CalcBoneAdj( pos, q, GetEncodedControllerArray() );
 }
 
-int CBaseAnimating::DrawDebugTextOverlays(void) 
+int CBaseAnimating::DrawDebugTextOverlays(void)
 {
 	int text_offset = BaseClass::DrawDebugTextOverlays();
 
-	if (m_debugOverlays & OVERLAY_TEXT_BIT) 
+	if (m_debugOverlays & OVERLAY_TEXT_BIT)
 	{
 		// ----------------
 		// Print Look time
@@ -3012,7 +3069,7 @@ int CBaseAnimating::DrawDebugTextOverlays(void)
 
 	// Visualize attachment points
 	if ( m_debugOverlays & OVERLAY_ATTACHMENTS_BIT )
-	{	
+	{
 		CStudioHdr *pStudioHdr = GetModelPtr();
 
 		if ( pStudioHdr )
@@ -3029,7 +3086,7 @@ int CBaseAnimating::DrawDebugTextOverlays(void)
 				NDebugOverlay::Line( vecPos, vecPos + ( vecForward * 4.0f ), 255, 0, 0, true, 0.05f );
 				NDebugOverlay::Line( vecPos, vecPos + ( vecRight * 4.0f ), 0, 255, 0, true, 0.05f );
 				NDebugOverlay::Line( vecPos, vecPos + ( vecUp * 4.0f ), 0, 0, 255, true, 0.05f );
-				
+
 				Q_snprintf( tempstr, sizeof(tempstr), " < %s (%d)", pStudioHdr->pAttachment(i-1).pszName(), i );
 				NDebugOverlay::Text( vecPos, tempstr, true, 0.05f );
 			}
@@ -3049,7 +3106,7 @@ void CBaseAnimating::ResetClientsideFrame( void )
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: Returns the origin at which to play an inputted dispatcheffect 
+// Purpose: Returns the origin at which to play an inputted dispatcheffect
 //-----------------------------------------------------------------------------
 void CBaseAnimating::GetInputDispatchEffectPosition( const char *sInputString, Vector &pOrigin, QAngle &pAngles )
 {
@@ -3059,7 +3116,7 @@ void CBaseAnimating::GetInputDispatchEffectPosition( const char *sInputString, V
 	{
 		if ( !GetAttachment( iAttachment, pOrigin, pAngles ) )
 		{
-			Msg( "ERROR: Mapmaker tried to spawn DispatchEffect %s, but %s has no attachment %d\n", 
+			Msg( "ERROR: Mapmaker tried to spawn DispatchEffect %s, but %s has no attachment %d\n",
 				sInputString, STRING(GetModelName()), iAttachment );
 		}
 		return;
@@ -3069,8 +3126,8 @@ void CBaseAnimating::GetInputDispatchEffectPosition( const char *sInputString, V
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
-// Input  : setnum - 
+// Purpose:
+// Input  : setnum -
 //-----------------------------------------------------------------------------
 void CBaseAnimating::SetHitboxSet( int setnum )
 {
@@ -3096,8 +3153,8 @@ void CBaseAnimating::SetHitboxSet( int setnum )
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
-// Input  : *setname - 
+// Purpose:
+// Input  : *setname -
 //-----------------------------------------------------------------------------
 void CBaseAnimating::SetHitboxSetByName( const char *setname )
 {
@@ -3106,7 +3163,7 @@ void CBaseAnimating::SetHitboxSetByName( const char *setname )
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
+// Purpose:
 // Output : int
 //-----------------------------------------------------------------------------
 int CBaseAnimating::GetHitboxSet( void )
@@ -3115,7 +3172,7 @@ int CBaseAnimating::GetHitboxSet( void )
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
+// Purpose:
 // Output : char const
 //-----------------------------------------------------------------------------
 const char *CBaseAnimating::GetHitboxSetName( void )
@@ -3125,7 +3182,7 @@ const char *CBaseAnimating::GetHitboxSetName( void )
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
+// Purpose:
 // Output : int
 //-----------------------------------------------------------------------------
 int CBaseAnimating::GetHitboxSetCount( void )
@@ -3134,7 +3191,7 @@ int CBaseAnimating::GetHitboxSetCount( void )
 	return ::GetHitboxSetCount( GetModelPtr() );
 }
 
-static Vector	hullcolor[8] = 
+static Vector	hullcolor[8] =
 {
 	Vector( 1.0, 1.0, 1.0 ),
 	Vector( 1.0, 0.5, 0.5 ),
@@ -3177,7 +3234,7 @@ void CBaseAnimating::DrawServerHitboxes( float duration /*= 0.0f*/, bool monocol
 		if ( !monocolor )
 		{
 			int j = (pbox->group % 8);
-			
+
 			r = ( int ) ( 255.0f * hullcolor[j][0] );
 			g = ( int ) ( 255.0f * hullcolor[j][1] );
 			b = ( int ) ( 255.0f * hullcolor[j][2] );
@@ -3198,7 +3255,7 @@ void CBaseAnimating::DrawRawSkeleton( matrix3x4_t boneToWorld[], int boneMask, b
 	int r = 255;
 	int g = 255;
 	int b = monocolor ? 255 : 0;
-	
+
 
 	for (i = 0; i < pStudioHdr->numbones(); i++)
 	{
@@ -3372,10 +3429,10 @@ bool CBaseAnimating::LookupHitbox( const char *szName, int& outSet, int& outBox 
 		for( int i = 0; i < pHdr->iHitboxCount(set); i++ )
 		{
 			mstudiobbox_t* pBox = pHdr->pHitbox( i, set );
-			
+
 			if( !pBox )
 				continue;
-			
+
 			const char* szBoxName = pBox->pszHitboxName();
 			if( Q_stricmp( szBoxName, szName ) == 0 )
 			{
@@ -3480,8 +3537,8 @@ void CBaseAnimating::DoMuzzleFlash()
 
 
 //-----------------------------------------------------------------------------
-// Purpose: 
-// Input  : scale - 
+// Purpose:
+// Input  : scale -
 //-----------------------------------------------------------------------------
 void CBaseAnimating::SetModelScale( float scale, float change_duration /*= 0.0f*/  )
 {
@@ -3663,7 +3720,7 @@ bool CBaseAnimating::Dissolve( const char *pMaterialName, float flStartTime, boo
 
 
 //-----------------------------------------------------------------------------
-// Make a model look as though it's burning. 
+// Make a model look as though it's burning.
 //-----------------------------------------------------------------------------
 void CBaseAnimating::Scorch( int rate, int floor )
 {
@@ -3688,14 +3745,14 @@ void CBaseAnimating::ResetSequence(int nSequence)
 	{
 		DevMsg("ResetSequence : %s: %s -> %s\n", GetClassname(), GetSequenceName(GetSequence()), GetSequenceName(nSequence));
 	}
-	
+
 	if ( !SequenceLoops() )
 	{
 		SetCycle( 0 );
 	}
 
 	// Tracker 17868:  If the sequence number didn't actually change, but you call resetsequence info, it changes
-	//  the newsequenceparity bit which causes the client to call m_flCycle.Reset() which causes a very slight 
+	//  the newsequenceparity bit which causes the client to call m_flCycle.Reset() which causes a very slight
 	//  discontinuity in looping animations as they reset around to cycle 0.0.  This was causing the parentattached
 	//  helmet on barney to hitch every time barney's idle cycled back around to its start.
 	bool changed = nSequence != GetSequence() ? true : false;
@@ -3735,7 +3792,7 @@ void CBaseAnimating::InputBecomeRagdoll( inputdata_t &inputdata )
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
+// Purpose:
 //-----------------------------------------------------------------------------
 void CBaseAnimating::SetFadeDistance( float minFadeDist, float maxFadeDist )
 {
@@ -3745,7 +3802,7 @@ void CBaseAnimating::SetFadeDistance( float minFadeDist, float maxFadeDist )
 
 //-----------------------------------------------------------------------------
 // Purpose: Async prefetches all anim data used by a particular sequence.  Returns true if all of the required data is memory resident
-// Input  : iSequence - 
+// Input  : iSequence -
 // Output : Returns true on success, false on failure.
 //-----------------------------------------------------------------------------
 bool CBaseAnimating::PrefetchSequence( int iSequence )
@@ -3758,7 +3815,7 @@ bool CBaseAnimating::PrefetchSequence( int iSequence )
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
+// Purpose:
 //-----------------------------------------------------------------------------
 bool CBaseAnimating::IsSequenceLooping( CStudioHdr *pStudioHdr, int iSequence )
 {
@@ -3780,7 +3837,7 @@ CStudioHdr *CBaseAnimating::OnNewModel()
 		return NULL;
 	}
 
-	CStudioHdr *hdr = GetModelPtr(); 
+	CStudioHdr *hdr = GetModelPtr();
 
 	if ( m_bResetSequenceInfoOnLoad )
 	{

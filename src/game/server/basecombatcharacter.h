@@ -38,7 +38,7 @@ typedef CHandle<CBaseCombatWeapon> CBaseCombatWeaponHandle;
 //  Capability Bits
 // -------------------------------------
 
-enum Capability_t 
+enum Capability_t
 {
 	bits_CAP_MOVE_GROUND			= 0x00000001, // walk/run
 	bits_CAP_MOVE_JUMP				= 0x00000002, // jump/leap
@@ -83,7 +83,7 @@ class CBaseCombatWeapon;
 
 #define BCC_DEFAULT_LOOK_TOWARDS_TOLERANCE 0.9f
 
-enum Disposition_t 
+enum Disposition_t
 {
 	D_ER,		// Undefined - error
 	D_HT,		// Hate
@@ -105,7 +105,7 @@ struct Relationship_t
 };
 
 //-----------------------------------------------------------------------------
-// Purpose: This should contain all of the combat entry points / functionality 
+// Purpose: This should contain all of the combat entry points / functionality
 // that are common between NPCs and players
 //-----------------------------------------------------------------------------
 class CBaseCombatCharacter : public CBaseFlex
@@ -150,7 +150,7 @@ public:
 
 	virtual bool		FInAimCone( CBaseEntity *pEntity );
 	virtual bool		FInAimCone( const Vector &vecSpot );
-	
+
 	virtual bool		ShouldShootMissTarget( CBaseCombatCharacter *pAttacker );
 	virtual CBaseEntity *FindMissTarget( void );
 
@@ -171,7 +171,7 @@ public:
 	// -----------------------
 	// Fog
 	// -----------------------
-	
+
 	void				OnFogTriggerStartTouch( CBaseEntity *fogTrigger );
 	void				OnFogTriggerEndTouch( CBaseEntity *fogTrigger );
 	CBaseEntity *		GetFogTrigger( void );
@@ -197,7 +197,7 @@ public:
 	virtual bool IsLookingTowards( const CBaseEntity *target, float cosTolerance = BCC_DEFAULT_LOOK_TOWARDS_TOLERANCE ) const;	// return true if our view direction is pointing at the given target, within the cosine of the angular tolerance. LINE OF SIGHT IS NOT CHECKED.
 	virtual bool IsLookingTowards( const Vector &target, float cosTolerance = BCC_DEFAULT_LOOK_TOWARDS_TOLERANCE ) const;	// return true if our view direction is pointing at the given target, within the cosine of the angular tolerance. LINE OF SIGHT IS NOT CHECKED.
 
-	virtual bool IsInFieldOfView( CBaseEntity *entity ) const;	// Calls IsLookingTowards with the current field of view.  
+	virtual bool IsInFieldOfView( CBaseEntity *entity ) const;	// Calls IsLookingTowards with the current field of view.
 	virtual bool IsInFieldOfView( const Vector &pos ) const;
 
 	enum LineOfSightCheckType
@@ -294,7 +294,7 @@ public:
 
 	// Killed a character
 	void InputKilledNPC( inputdata_t &inputdata );
-	virtual void OnKilledNPC( CBaseCombatCharacter *pKilled ) {}; 
+	virtual void OnKilledNPC( CBaseCombatCharacter *pKilled ) {};
 
 	// Exactly one of these happens immediately after killed (gibbed may happen later when the corpse gibs)
 	// Character gibbed or faded out (violence controls) (only fired once)
@@ -339,7 +339,7 @@ protected:
 	Relationship_t			*FindEntityRelationship( CBaseEntity *pTarget );
 
 public:
-	
+
 	// Vehicle queries
 	virtual bool IsInAVehicle( void ) const { return false; }
 	virtual IServerVehicle *GetVehicle( void ) { return NULL; }
@@ -380,7 +380,7 @@ public:
 	void	SetHullType( Hull_t hullType )	{ m_eHull = hullType; }
 
 	// FIXME: The following 3 methods are backdoor hack methods
-	
+
 	// This is a sort of hack back-door only used by physgun!
 	void SetAmmoCount( int iCount, int iAmmoIndex );
 
@@ -407,7 +407,7 @@ public:
 	bool				m_bPreventWeaponPickup;
 
 	virtual CNavArea *GetLastKnownArea( void ) const		{ return m_lastNavArea; }		// return the last nav area the player occupied - NULL if unknown
-	virtual bool IsAreaTraversable( const CNavArea *area ) const;							// return true if we can use the given area 
+	virtual bool IsAreaTraversable( const CNavArea *area ) const;							// return true if we can use the given area
 	virtual void ClearLastKnownArea( void );
 	virtual void UpdateLastKnownArea( void );										// invoke this to update our last known nav area (since there is no think method chained to CBaseCombatCharacter)
 	virtual void OnNavAreaChanged( CNavArea *enteredArea, CNavArea *leftArea ) { }	// invoked (by UpdateLastKnownArea) when we enter a new nav area (or it is reset to NULL)
@@ -417,13 +417,6 @@ public:
 	// Notification from INextBots.
 	// -----------------------
 	virtual void		OnPursuedBy( INextBot * RESTRICT pPursuer ){} // called every frame while pursued by a bot in DirectChase.
-
-#ifdef GLOWS_ENABLE
-	// Glows
-	void				AddGlowEffect( void );
-	void				RemoveGlowEffect( void );
-	bool				IsGlowEffectActive( void );
-#endif // GLOWS_ENABLE
 
 #ifdef INVASION_DLL
 public:
@@ -462,11 +455,6 @@ protected:
 public:
 	CNetworkVar( float, m_flNextAttack );			// cannot attack again until this time
 
-#ifdef GLOWS_ENABLE
-protected:
-	CNetworkVar( bool, m_bGlowEnabled );
-#endif // GLOWS_ENABLE
-
 private:
 	Hull_t		m_eHull;
 
@@ -496,7 +484,7 @@ private:
 	void DropWeaponForWeaponStrip( CBaseCombatWeapon *pWeapon, const Vector &vecForward, const QAngle &vecAngles, float flDiameter );
 
 	friend class CScriptedTarget; // needs to access GetInteractionID()
-	
+
 	static int					m_lastInteraction;	// Last registered interaction #
 	static Relationship_t**		m_DefaultRelationship;
 
@@ -504,7 +492,7 @@ private:
 	int					m_LastHitGroup;			// the last body region that took damage
 	float				m_flDamageAccumulator;	// so very small amounts of damage do not get lost.
 	int					m_iDamageCount;			// # of times NPC has been damaged.  used for tracking 1-shot kills.
-	
+
 	// Weapon proficiency gets calculated each time an NPC changes his weapon, and then
 	// cached off as the CurrentWeaponProficiency.
 	WeaponProficiency_t m_CurrentWeaponProficiency;
@@ -513,7 +501,7 @@ private:
 	//  Relationships
 	// ---------------
 	CUtlVector<Relationship_t>		m_Relationship;						// Array of relationships
-	
+
 	// Used by trigger_fog to manage when the character is touching multiple fog triggers simultaneously.
 	// The one at the HEAD of the list is always the current fog trigger for the character.
 	CUtlVector<EHANDLE> m_hTriggerFogList;
@@ -523,16 +511,16 @@ protected:
 	// shared ammo slots
 	CNetworkArrayForDerived( int, m_iAmmo, MAX_AMMO_SLOTS );
 
-	// Usable character items 
+	// Usable character items
 	CNetworkArray( CBaseCombatWeaponHandle, m_hMyWeapons, MAX_WEAPONS );
 
 	CNetworkHandle( CBaseCombatWeapon, m_hActiveWeapon );
 
 	friend class CCleanupDefaultRelationShips;
-	
+
 	IntervalTimer m_aliveTimer;
 
-	unsigned int m_hasBeenInjured;							// bitfield corresponding to team ID that did the injury	
+	unsigned int m_hasBeenInjured;							// bitfield corresponding to team ID that did the injury
 
 	// we do this because MAX_TEAMS is 32, which is wasteful for most games
 	enum { MAX_DAMAGE_TEAMS = 4 };
@@ -556,7 +544,7 @@ inline float CBaseCombatCharacter::GetAliveDuration( void ) const
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
+// Purpose:
 //-----------------------------------------------------------------------------
 inline int	CBaseCombatCharacter::WeaponCount() const
 {
@@ -564,8 +552,8 @@ inline int	CBaseCombatCharacter::WeaponCount() const
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
-// Input  : i - 
+// Purpose:
+// Input  : i -
 //-----------------------------------------------------------------------------
 inline CBaseCombatWeapon *CBaseCombatCharacter::GetWeapon( int i ) const
 {
@@ -586,19 +574,19 @@ EXTERN_SEND_TABLE(DT_BaseCombatCharacter);
 void RadiusDamage( const CTakeDamageInfo &info, const Vector &vecSrc, float flRadius, int iClassIgnore, CBaseEntity *pEntityIgnore );
 
 //-----------------------------------------------------------------------------
-// Purpose: 
+// Purpose:
 //-----------------------------------------------------------------------------
 class CTraceFilterMelee : public CTraceFilterEntitiesOnly
 {
 public:
 	// It does have a base, but we'll never network anything below here..
 	DECLARE_CLASS_NOBASE( CTraceFilterMelee );
-	
+
 	CTraceFilterMelee( const IHandleEntity *passentity, int collisionGroup, CTakeDamageInfo *dmgInfo, float flForceScale, bool bDamageAnyNPC )
 		: m_pPassEnt(passentity), m_collisionGroup(collisionGroup), m_dmgInfo(dmgInfo), m_pHit(NULL), m_flForceScale(flForceScale), m_bDamageAnyNPC(bDamageAnyNPC)
 	{
 	}
-	
+
 	virtual bool ShouldHitEntity( IHandleEntity *pHandleEntity, int contentsMask );
 
 public:

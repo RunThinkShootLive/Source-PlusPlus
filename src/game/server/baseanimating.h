@@ -1,6 +1,6 @@
 //========= Copyright Valve Corporation, All rights reserved. ============//
 //
-// Purpose: 
+// Purpose:
 //
 //=============================================================================//
 
@@ -77,6 +77,11 @@ public:
 	// the transmission of animtime.
 	bool	IsUsingClientSideAnimation()	{ return m_bClientSideAnimation; }
 
+#ifdef GLOWS_ENABLE
+	void UpdateOnRemove();
+	void ChangeTeam( int team );
+	void Event_Killed( const CTakeDamageInfo &info );
+#endif
 
 	// Basic NPC Animation functions
 	virtual float	GetIdealSpeed( ) const;
@@ -163,7 +168,7 @@ public:
 
 protected:
 	// The modus operandi for pose parameters is that you should not use the const char * version of the functions
-	// in general code -- it causes many many string comparisons, which is slower than you think. Better is to 
+	// in general code -- it causes many many string comparisons, which is slower than you think. Better is to
 	// save off your pose parameters in member variables in your derivation of this function:
 	virtual void	PopulatePoseParameters( void );
 
@@ -181,7 +186,7 @@ public:
 	bool GotoSequence( int iCurrentSequence, float flCurrentCycle, float flCurrentRate,  int iGoalSequence, int &iNextSequence, float &flCycle, int &iDir );
 	int  GetEntryNode( int iSequence );
 	int  GetExitNode( int iSequence );
-	
+
 	void GetEyeballs( Vector &origin, QAngle &angles ); // ?? remove ??
 
 	int LookupAttachment( const char *szName );
@@ -196,7 +201,7 @@ public:
 	bool GetAttachmentLocal( const char *szName, Vector &origin, QAngle &angles );
 	bool GetAttachmentLocal( int iAttachment, Vector &origin, QAngle &angles );
 	bool GetAttachmentLocal( int iAttachment, matrix3x4_t &attachmentToLocal );
-	
+
 	// Non-angle versions of the attachments in world space
 	bool GetAttachment(  const char *szName, Vector &absOrigin, Vector *forward = NULL, Vector *right = NULL, Vector *up = NULL );
 	bool GetAttachment( int iAttachment, Vector &absOrigin, Vector *forward = NULL, Vector *right = NULL, Vector *up = NULL );
@@ -225,10 +230,10 @@ public:
 	// Computes a box that surrounds all hitboxes
 	bool ComputeHitboxSurroundingBox( Vector *pVecWorldMins, Vector *pVecWorldMaxs );
 	bool ComputeEntitySpaceHitboxSurroundingBox( Vector *pVecWorldMins, Vector *pVecWorldMaxs );
-	
+
 	// Computes a box that surrounds a single hitboxes
 	bool ComputeHitboxSurroundingBox( int iHitbox, Vector *pVecWorldMins, Vector *pVecWorldMaxs );
-	
+
 	// Clone a CBaseAnimating from another (copies model & sequence data)
 	void CopyAnimationDataFrom( CBaseAnimating *pSource );
 
@@ -240,13 +245,13 @@ public:
 
 // Controllers.
 	virtual	void			InitBoneControllers ( void );
-	
+
 	// Return's the controller's angle/position in bone space.
 	float					GetBoneController ( int iController );
 
 	// Maps the angle/position value you specify into the bone's start/end and sets the specified controller to the value.
 	float					SetBoneController ( int iController, float flValue );
-	
+
 	void					GetVelocity(Vector *vVelocity, AngularImpulse *vAngVelocity);
 
 	// these two need to move somewhere else
@@ -272,7 +277,7 @@ public:
 	virtual void InvalidateBoneCache( void );
 	void InvalidateBoneCacheIfOlderThan( float deltaTime );
 	virtual int DrawDebugTextOverlays( void );
-	
+
 	// See note in code re: bandwidth usage!!!
 	void				DrawServerHitboxes( float duration = 0.0f, bool monocolor = false );
 	void				DrawRawSkeleton( matrix3x4_t boneToWorld[], int boneMask, bool noDepthTest = true, float duration = 0.0f, bool monocolor = false );
@@ -282,7 +287,7 @@ public:
 
 	void				UpdateModelScale();
 	virtual	void		RefreshCollisionBounds( void );
-	
+
 	// also calculate IK on server? (always done on client)
 	void EnableServerIK();
 	void DisableServerIK();
@@ -331,7 +336,7 @@ public:
 	const float* GetPoseParameterArray() { return m_flPoseParameter.Base(); }
 	const float* GetEncodedControllerArray() { return m_flEncodedController.Base(); }
 
-	void BuildMatricesWithBoneMerge( const CStudioHdr *pStudioHdr, const QAngle& angles, 
+	void BuildMatricesWithBoneMerge( const CStudioHdr *pStudioHdr, const QAngle& angles,
 		const Vector& origin, const Vector pos[MAXSTUDIOBONES],
 		const Quaternion q[MAXSTUDIOBONES], matrix3x4_t bonetoworld[MAXSTUDIOBONES],
 		CBaseAnimating *pParent, CBoneCache *pParentCache );
@@ -343,6 +348,13 @@ public:
 	inline void	ClearBoneCacheFlags( unsigned short fFlag ) { m_fBoneCacheFlags &= ~fFlag; }
 
 	bool PrefetchSequence( int iSequence );
+
+#ifdef GLOWS_ENABLE
+	// Glows
+	void				AddGlowEffect( void );
+	void				RemoveGlowEffect( void );
+	bool				IsGlowEffectActive( void );
+#endif // GLOWS_ENABLE
 
 private:
 	void LockStudioHdr();
@@ -397,7 +409,7 @@ private:
 
 	// was pev->frame
 	CNetworkVar( float, m_flCycle );
-	CNetworkVar( int, m_nSequence );	
+	CNetworkVar( int, m_nSequence );
 	CNetworkArray( float, m_flPoseParameter, NUM_POSEPAREMETERS );	// must be private so manual mode works!
 	CNetworkArray( float, m_flEncodedController, NUM_BONECTRLS );		// bone controller setting (0..1)
 
@@ -426,6 +438,10 @@ protected:
 	CNetworkVar( float, m_fadeMaxDist );	// Point at which fading is inactive
 	CNetworkVar( float, m_flFadeScale );	// Scale applied to min / max
 
+#ifdef GLOWS_ENABLE
+	CNetworkVar( bool, m_bGlowEnabled );
+#endif // GLOWS_ENABLE
+
 public:
 	COutputEvent m_OnIgnite;
 
@@ -443,8 +459,8 @@ friend class CBlendingCycler;
 //-----------------------------------------------------------------------------
 // Purpose: return a pointer to an updated studiomdl cache cache
 //-----------------------------------------------------------------------------
-inline CStudioHdr *CBaseAnimating::GetModelPtr( void ) 
-{ 
+inline CStudioHdr *CBaseAnimating::GetModelPtr( void )
+{
 	MDLCACHE_CRITICAL_SECTION();
 
 	if ( IsDynamicModelLoading() )
@@ -539,7 +555,7 @@ EXTERN_SEND_TABLE(DT_BaseAnimating);
 #define ANIMATION_SEQUENCE_BITS			12	// 4096 sequences
 #define ANIMATION_SKIN_BITS				10	// 1024 body skin selections FIXME: this seems way high
 #define ANIMATION_BODY_BITS				32	// body combinations
-#define ANIMATION_HITBOXSET_BITS		2	// hit box sets 
+#define ANIMATION_HITBOXSET_BITS		2	// hit box sets
 #if defined( TF_DLL )
 #define ANIMATION_POSEPARAMETER_BITS	8	// pose parameter resolution
 #else
