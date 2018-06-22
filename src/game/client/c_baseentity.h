@@ -1285,8 +1285,8 @@ public:
 
 	void				SetClientSideGlowEnabled( bool bEnabled ) { m_bClientSideGlowEnabled = bEnabled; UpdateGlowEffect(); }
 	bool				IsClientSideGlowEnabled( void ) { return m_bClientSideGlowEnabled; }
-protected:
 
+protected:
 	virtual void		UpdateGlowEffect( void );
 	virtual void		DestroyGlowEffect( void );
 

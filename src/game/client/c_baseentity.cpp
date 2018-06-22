@@ -972,6 +972,14 @@ C_BaseEntity::C_BaseEntity() :
 #endif
 
 	ParticleProp()->Init( this );
+
+#ifdef GLOWS_ENABLE
+	m_pGlowEffect = NULL;
+	m_bGlowEnabled = false;
+	m_bOldGlowEnabled = false;
+	m_bClientSideGlowEnabled = false;
+	m_clrRender.Init( 194, 194, 194 );
+#endif // GLOWS_ENABLE
 }
 
 
@@ -3275,6 +3283,10 @@ void C_BaseEntity::OnPreDataChanged( DataUpdateType_t type )
 {
 	m_hOldMoveParent = m_hNetworkMoveParent;
 	m_iOldParentAttachment = m_iParentAttachment;
+
+#ifdef GLOWS_ENABLE
+	m_bOldGlowEnabled = m_bGlowEnabled;
+#endif // GLOWS_ENABLE
 }
 
 void C_BaseEntity::OnDataChanged( DataUpdateType_t type )
@@ -3289,6 +3301,13 @@ void C_BaseEntity::OnDataChanged( DataUpdateType_t type )
 	{
 		UpdateVisibility();
 	}
+
+#ifdef GLOWS_ENABLE
+	if ( m_bOldGlowEnabled != m_bGlowEnabled )
+	{
+		UpdateGlowEffect();
+	}
+#endif // GLOWS_ENABLE
 }
 
 ClientThinkHandle_t C_BaseEntity::GetThinkHandle()
@@ -5076,6 +5095,10 @@ string_t C_BaseEntity::GetModelName( void ) const
 //-----------------------------------------------------------------------------
 void C_BaseEntity::UpdateOnRemove( void )
 {
+#ifdef GLOWS_ENABLE
+	DestroyGlowEffect();
+#endif // GLOWS_ENABLE
+
 	VPhysicsDestroyObject();
 
 	Assert( !GetMoveParent() );
@@ -6373,6 +6396,67 @@ bool C_BaseEntity::ValidateEntityAttachedToPlayer( bool &bShouldRetry )
 	return !pParent->IsPlayer();
 }
 #endif // TF_CLIENT_DLL
+
+#ifdef GLOWS_ENABLE
+//-----------------------------------------------------------------------------
+// Purpose:
+//-----------------------------------------------------------------------------
+void C_BaseEntity::GetGlowEffectColor( float *r, float *g, float *b )
+{
+	*r = m_clrRender.GetR() / 255.f;
+	*g = m_clrRender.GetG() / 255.f;
+	*b = m_clrRender.GetB() / 255.f;
+}
+
+//-----------------------------------------------------------------------------
+// Purpose:
+//-----------------------------------------------------------------------------
+/*
+void C_BaseCombatCharacter::EnableGlowEffect( float r, float g, float b )
+{
+// destroy the existing effect
+if ( m_pGlowEffect )
+{
+DestroyGlowEffect();
+}
+
+m_pGlowEffect = new CGlowObject( this, Vector( r, g, b ), 1.0, true );
+}
+*/
+
+//-----------------------------------------------------------------------------
+// Purpose:
+//-----------------------------------------------------------------------------
+void C_BaseEntity::UpdateGlowEffect( void )
+{
+	// destroy the existing effect
+	if ( m_pGlowEffect )
+	{
+		DestroyGlowEffect();
+	}
+
+	// create a new effect
+	if ( m_bGlowEnabled || m_bClientSideGlowEnabled )
+	{
+		float r, g, b;
+		GetGlowEffectColor( &r, &g, &b );
+
+		m_pGlowEffect = new CGlowObject( this, Vector( r, g, b ), 1.0, true );
+	}
+}
+
+//-----------------------------------------------------------------------------
+// Purpose:
+//-----------------------------------------------------------------------------
+void C_BaseEntity::DestroyGlowEffect( void )
+{
+	if ( m_pGlowEffect )
+	{
+		delete m_pGlowEffect;
+		m_pGlowEffect = NULL;
+	}
+}
+#endif // GLOWS_ENABLE
 
 
 void C_BaseEntity::AddVar( void *data, IInterpolatedVar *watcher, int type, bool bSetup )

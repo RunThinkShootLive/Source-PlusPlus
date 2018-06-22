@@ -742,14 +742,6 @@ C_BaseAnimating::C_BaseAnimating() :
 	Q_memset(&m_mouth, 0, sizeof(m_mouth));
 	m_flCycle = 0;
 	m_flOldCycle = 0;
-
-#ifdef GLOWS_ENABLE
-	m_pGlowEffect = NULL;
-	m_bGlowEnabled = false;
-	m_bOldGlowEnabled = false;
-	m_bClientSideGlowEnabled = false;
-	m_clrRender.Init( 194, 194, 194 );
-#endif // GLOWS_ENABLE
 }
 
 //-----------------------------------------------------------------------------
@@ -2282,10 +2274,6 @@ bool C_BaseAnimating::IsViewModel() const
 void C_BaseAnimating::UpdateOnRemove( void )
 {
 	RemoveFromClientSideAnimationList( true );
-
-#ifdef GLOWS_ENABLE
-	DestroyGlowEffect();
-#endif // GLOWS_ENABLE
 
 	BaseClass::UpdateOnRemove();
 }
@@ -4592,10 +4580,6 @@ void C_BaseAnimating::OnPreDataChanged( DataUpdateType_t updateType )
 	BaseClass::OnPreDataChanged( updateType );
 
 	m_bLastClientSideFrameReset = m_bClientSideFrameReset;
-
-#ifdef GLOWS_ENABLE
-	m_bOldGlowEnabled = m_bGlowEnabled;
-#endif // GLOWS_ENABLE
 }
 
 bool C_BaseAnimating::ForceSetupBonesAtTime( matrix3x4_t *pBonesOut, float flTime )
@@ -4823,13 +4807,6 @@ void C_BaseAnimating::OnDataChanged( DataUpdateType_t updateType )
 		m_nPrevSequence = -1;
 		m_nRestoreSequence = -1;
 	}
-
-#ifdef GLOWS_ENABLE
-	if ( m_bOldGlowEnabled != m_bGlowEnabled )
-	{
-		UpdateGlowEffect();
-	}
-#endif // GLOWS_ENABLE
 
 	bool modelchanged = false;
 
@@ -6566,64 +6543,3 @@ void C_BaseAnimating::MoveBoneAttachments( C_BaseAnimating* attachTarget )
 		}
 	}
 }
-
-#ifdef GLOWS_ENABLE
-//-----------------------------------------------------------------------------
-// Purpose:
-//-----------------------------------------------------------------------------
-void C_BaseAnimating::GetGlowEffectColor( float *r, float *g, float *b )
-{
-	*r = m_clrRender.GetR() / 255.f;
-	*g = m_clrRender.GetG() / 255.f;
-	*b = m_clrRender.GetB() / 255.f;
-}
-
-//-----------------------------------------------------------------------------
-// Purpose:
-//-----------------------------------------------------------------------------
-/*
-void C_BaseCombatCharacter::EnableGlowEffect( float r, float g, float b )
-{
-// destroy the existing effect
-if ( m_pGlowEffect )
-{
-DestroyGlowEffect();
-}
-
-m_pGlowEffect = new CGlowObject( this, Vector( r, g, b ), 1.0, true );
-}
-*/
-
-//-----------------------------------------------------------------------------
-// Purpose:
-//-----------------------------------------------------------------------------
-void C_BaseAnimating::UpdateGlowEffect( void )
-{
-	// destroy the existing effect
-	if ( m_pGlowEffect )
-	{
-		DestroyGlowEffect();
-	}
-
-	// create a new effect
-	if ( m_bGlowEnabled || m_bClientSideGlowEnabled )
-	{
-		float r, g, b;
-		GetGlowEffectColor( &r, &g, &b );
-
-		m_pGlowEffect = new CGlowObject( this, Vector( r, g, b ), 1.0, true );
-	}
-}
-
-//-----------------------------------------------------------------------------
-// Purpose:
-//-----------------------------------------------------------------------------
-void C_BaseAnimating::DestroyGlowEffect( void )
-{
-	if ( m_pGlowEffect )
-	{
-		delete m_pGlowEffect;
-		m_pGlowEffect = NULL;
-	}
-}
-#endif // GLOWS_ENABLE
