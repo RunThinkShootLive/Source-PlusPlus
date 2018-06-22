@@ -1,6 +1,6 @@
 //========= Copyright Valve Corporation, All rights reserved. ============//
 //
-// Purpose: 
+// Purpose:
 //
 //=============================================================================//
 
@@ -28,10 +28,11 @@
 #define SF_PHYSPROP_HAS_ATTACHED_RAGDOLLS		0x000800		// Need to remove attached ragdolls on enable motion/etc
 #define SF_PHYSPROP_FORCE_TOUCH_TRIGGERS		0x001000		// Override normal debris behavior and respond to triggers anyway
 #define SF_PHYSPROP_FORCE_SERVER_SIDE			0x002000		// Force multiplayer physics object to be serverside
-#define SF_PHYSPROP_RADIUS_PICKUP				0x004000		// For Xbox, makes small objects easier to pick up by allowing them to be found 
+#define SF_PHYSPROP_RADIUS_PICKUP				0x004000		// For Xbox, makes small objects easier to pick up by allowing them to be found
 #define SF_PHYSPROP_ALWAYS_PICK_UP				0x100000		// Physcannon can always pick this up, no matter what mass or constraints may apply.
 #define SF_PHYSPROP_NO_COLLISIONS				0x200000		// Don't enable collisions on spawn
 #define SF_PHYSPROP_IS_GIB						0x400000		// Limit # of active gibs
+#define SF_PHYSPROP_GRAVITY_GUN_FROZEN			0x800000		// If set, a motion disabled physbox can be unfrozen using the gravity gun tertiary attack
 
 // Any barrel farther away than this is ignited rather than exploded.
 #define PROP_EXPLOSION_IGNITE_RADIUS			32.0f
@@ -66,7 +67,7 @@ enum propdata_interactions_t
 	PROPINTER_PHYSGUN_ALLOW_OVERHEAD,	// "allow_overhead"	"yes"
 
 	PROPINTER_WORLD_BLOODSPLAT,			// "onworldimpact", "bloodsplat"
-	
+
 	PROPINTER_PHYSGUN_NOTIFY_CHILDREN,	// "onfirstimpact" cause attached flechettes to explode
 
 	// If we get more than 32 of these, we'll need a different system
@@ -84,9 +85,9 @@ public:
 };
 
 #define PHYSICS_MULTIPLAYER_AUTODETECT	0	// use multiplayer physics mode as defined in model prop data
-#define PHYSICS_MULTIPLAYER_SOLID		1	// soild, pushes player away 
+#define PHYSICS_MULTIPLAYER_SOLID		1	// soild, pushes player away
 #define PHYSICS_MULTIPLAYER_NON_SOLID	2	// nonsolid, but pushed by player
-#define PHYSICS_MULTIPLAYER_CLIENTSIDE	3	// Clientside only, nonsolid 	
+#define PHYSICS_MULTIPLAYER_CLIENTSIDE	3	// Clientside only, nonsolid
 
 enum mp_break_t
 {

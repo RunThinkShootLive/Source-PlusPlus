@@ -77,12 +77,6 @@ public:
 	// the transmission of animtime.
 	bool	IsUsingClientSideAnimation()	{ return m_bClientSideAnimation; }
 
-#ifdef GLOWS_ENABLE
-	void UpdateOnRemove();
-	void ChangeTeam( int team );
-	void Event_Killed( const CTakeDamageInfo &info );
-#endif
-
 	// Basic NPC Animation functions
 	virtual float	GetIdealSpeed( ) const;
 	virtual float	GetIdealAccel( ) const;
@@ -349,15 +343,6 @@ public:
 
 	bool PrefetchSequence( int iSequence );
 
-#ifdef GLOWS_ENABLE
-	// Glows
-	void				AddGlowEffect( void );
-	void				RemoveGlowEffect( void );
-	bool				IsGlowEffectActive( void );
-
-	void				SetGlow( bool state, const Color& glowColor = Color( 255, 255, 255 ) );
-#endif // GLOWS_ENABLE
-
 private:
 	void LockStudioHdr();
 	void UnlockStudioHdr();
@@ -439,11 +424,6 @@ protected:
 	CNetworkVar( float, m_fadeMinDist );	// Point at which fading is absolute
 	CNetworkVar( float, m_fadeMaxDist );	// Point at which fading is inactive
 	CNetworkVar( float, m_flFadeScale );	// Scale applied to min / max
-
-#ifdef GLOWS_ENABLE
-	CNetworkVar( bool, m_bGlowEnabled );
-	CNetworkColor32( m_glowColor );
-#endif // GLOWS_ENABLE
 
 public:
 	COutputEvent m_OnIgnite;

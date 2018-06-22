@@ -19,6 +19,7 @@ $Project "client"
 	"game\client\client_hl2mp.vpc"		[($WIN32||$POSIX) && $HL2MP]
 	"game\client\client_hl2.vpc"		[($WIN32||$POSIX) && $HL2]
 	"game\client\client_episodic.vpc"	[($WIN32||$POSIX) && $EPISODIC]
+	"game\client\client_rtsl.vpc"		[($WIN32||$POSIX) && $RTSL]
 	
 	"game\client\client_lostcoast.vpc"	[($WIN32||$POSIX) && $LOSTCOAST]
 	"game\client\client_cstrike.vpc"	[($WIN32||$POSIX) && $CSTRIKE]
@@ -37,6 +38,7 @@ $Project "game_shader_dx9"
 	"materialsystem\stdshaders\game_shader_dx9_hl2mp.vpc"		[$HL2MP && !$DEFERRED]
 	"materialsystem\stdshaders\game_shader_dx9_hl2.vpc"			[$HL2 && !$DEFERRED]
 	"materialsystem\stdshaders\game_shader_dx9_episodic.vpc"	[$EPISODIC && !$DEFERRED]
+	"materialsystem\stdshaders\game_shader_dx9_rtsl.vpc"		[$RTSL && !$DEFERRED]
 
 	"materialsystem\stdshaders\game_shader_dx9_lostcoast.vpc"	[!$DEFERRED && $LOSTCOAST]
 	"materialsystem\stdshaders\game_shader_dx9_cstrike.vpc"		[!$DEFERRED && $CSTRIKE]
@@ -62,6 +64,7 @@ $Project "server"
 	"game\server\server_hl2mp.vpc"		[($WIN32||$POSIX) && $HL2MP]
 	"game\server\server_hl2.vpc"		[($WIN32||$POSIX) && $HL2]
 	"game\server\server_episodic.vpc"	[($WIN32||$POSIX) && $EPISODIC]
+	"game\server\server_rtsl.vpc"		[($WIN32||$POSIX) && $RTSL]
 	
 	"game\server\server_lostcoast.vpc"	[($WIN32||$POSIX) && $LOSTCOAST]
 	"game\server\server_cstrike.vpc"	[($WIN32||$POSIX) && $CSTRIKE]

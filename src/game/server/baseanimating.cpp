@@ -261,11 +261,6 @@ IMPLEMENT_SERVERCLASS_ST(CBaseAnimating, DT_BaseAnimating)
 	SendPropFloat( SENDINFO( m_fadeMaxDist ), 0, SPROP_NOSCALE ),
 	SendPropFloat( SENDINFO( m_flFadeScale ), 0, SPROP_NOSCALE ),
 
-#ifdef GLOWS_ENABLE
-	SendPropBool( SENDINFO( m_bGlowEnabled ) ),
-	SendPropInt( SENDINFO( m_clrRender ), 32, SPROP_UNSIGNED ),
-#endif // GLOWS_ENABLE
-
 END_SEND_TABLE()
 
 
@@ -293,11 +288,6 @@ CBaseAnimating::CBaseAnimating()
 	m_fadeMaxDist = 0;
 	m_flFadeScale = 0.0f;
 	m_fBoneCacheFlags = 0;
-
-#ifdef GLOWS_ENABLE
-	m_bGlowEnabled.Set( false );
-	m_clrRender.Init( 194, 194, 194 );
-#endif // GLOWS_ENABLE
 }
 
 CBaseAnimating::~CBaseAnimating()
@@ -307,65 +297,6 @@ CBaseAnimating::~CBaseAnimating()
 	UnlockStudioHdr();
 	delete m_pStudioHdr;
 }
-
-#ifdef GLOWS_ENABLE
-void CBaseAnimating::UpdateOnRemove()
-{
-	RemoveGlowEffect();
-
-	BaseClass::UpdateOnRemove();
-}
-
-void CBaseAnimating::ChangeTeam( int team )
-{
-	RemoveGlowEffect();
-
-	BaseClass::ChangeTeam( team );
-}
-
-void CBaseAnimating::Event_Killed( const CTakeDamageInfo &info )
-{
-	RemoveGlowEffect();
-
-	BaseClass::Event_Killed( info );
-}
-
-//-----------------------------------------------------------------------------
-// Purpose:
-//-----------------------------------------------------------------------------
-void CBaseAnimating::AddGlowEffect( void )
-{
-	SetTransmitState( FL_EDICT_ALWAYS );
-	m_bGlowEnabled.Set( true );
-}
-
-//-----------------------------------------------------------------------------
-// Purpose:
-//-----------------------------------------------------------------------------
-void CBaseAnimating::RemoveGlowEffect( void )
-{
-	m_bGlowEnabled.Set( false );
-}
-
-//-----------------------------------------------------------------------------
-// Purpose:
-//-----------------------------------------------------------------------------
-bool CBaseAnimating::IsGlowEffectActive( void )
-{
-	return m_bGlowEnabled;
-}
-
-void CBaseAnimating::SetGlow( bool state, const Color& glowColor )
-{
-	if ( state && !m_bGlowEnabled )
-		AddGlowEffect();
-	else if ( !state && m_bGlowEnabled )
-		RemoveGlowEffect();
-	if ( state )
-		m_glowColor.Init( glowColor.r(), glowColor.g(), glowColor.b() );
-}
-#endif
-
 
 void CBaseAnimating::Precache()
 {

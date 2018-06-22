@@ -85,6 +85,11 @@ extern ConVar hl2_walkspeed;
 #define	MEGACANNON_MODEL "models/weapons/v_superphyscannon.mdl"
 #define	MEGACANNON_SKIN	1
 
+#ifdef RTSL
+#define FREEZEMODULE_BODYGROUP 1
+#define FREEZEMODULE_INDEX 1
+#endif
+
 // -------------------------------------------------------------------------
 //  Physcannon trace filter to handle special cases
 // -------------------------------------------------------------------------
@@ -94,8 +99,13 @@ class CTraceFilterPhyscannon : public CTraceFilterSimple
 public:
 	DECLARE_CLASS( CTraceFilterPhyscannon, CTraceFilterSimple );
 
+#ifndef RTSL
 	CTraceFilterPhyscannon( const IHandleEntity *passentity, int collisionGroup )
 		: CTraceFilterSimple( NULL, collisionGroup ), m_pTraceOwner( passentity ) {	}
+#else
+	CTraceFilterPhyscannon( const IHandleEntity *passentity, int collisionGroup, bool isFreezeTest = false )
+		: CTraceFilterSimple( NULL, collisionGroup ), m_pTraceOwner( passentity ), m_isFreezeTest( isFreezeTest ) { }
+#endif
 
 	// For this test, we only test against entities (then world brushes afterwards)
 	virtual TraceType_t	GetTraceType() const { return TRACE_ENTITIES_ONLY; }
@@ -141,6 +151,12 @@ public:
 		// Handle grate entities differently
 		if ( HasContentsGrate( pEntity ) )
 		{
+#ifdef RTSL
+			if ( m_isFreezeTest )
+			{
+				return FClassnameIs( pEntity, "prop_physics" ) || FClassnameIs( pEntity, "func_physbox" );
+			}
+#endif
 			// See if it's a grabbable physics prop
 			CPhysicsProp *pPhysProp = dynamic_cast<CPhysicsProp *>(pEntity);
 			if ( pPhysProp != NULL )
@@ -177,6 +193,10 @@ public:
 
 protected:
 	const IHandleEntity *m_pTraceOwner;
+#ifdef RTSL
+private:
+	bool m_isFreezeTest;
+#endif
 };
 
 // We want to test against brushes alone
@@ -244,6 +264,40 @@ void UTIL_PhyscannonTraceLine( const Vector &vecAbsStart, const Vector &vecAbsEn
 		}
 	}
 }
+
+#ifdef RTSL
+//-----------------------------------------------------------------------------
+// Purpose: Trace a line the special physcannon way!
+//-----------------------------------------------------------------------------
+void UTIL_PhyscannonTraceLineUnFreeze( const Vector &vecAbsStart, const Vector &vecAbsEnd, CBaseEntity *pTraceOwner, trace_t *pTrace )
+{
+	// Default to HL2 vanilla
+	if ( hl2_episodic.GetBool() == false )
+	{
+		CTraceFilterNoOwnerTest filter( pTraceOwner, COLLISION_GROUP_NONE );
+		UTIL_TraceLine( vecAbsStart, vecAbsEnd, ( MASK_SHOT | CONTENTS_GRATE ), &filter, pTrace );
+		return;
+	}
+
+	// First, trace against entities
+	CTraceFilterPhyscannon filter( pTraceOwner, COLLISION_GROUP_NONE, true );
+	UTIL_TraceLine( vecAbsStart, vecAbsEnd, ( MASK_SHOT | CONTENTS_GRATE ), &filter, pTrace );
+
+	// If we've hit something, test again to make sure no brushes block us
+	if ( pTrace->m_pEnt != NULL )
+	{
+		trace_t testTrace;
+		CTraceFilterOnlyBrushes brushFilter( COLLISION_GROUP_NONE );
+		UTIL_TraceLine( pTrace->startpos, pTrace->endpos, MASK_SHOT, &brushFilter, &testTrace );
+
+		// If we hit a brush, replace the trace with that result
+		if ( testTrace.fraction < 1.0f || testTrace.startsolid || testTrace.allsolid )
+		{
+			*pTrace = testTrace;
+		}
+	}
+}
+#endif
 
 //-----------------------------------------------------------------------------
 // Purpose: Trace a hull for the physcannon
@@ -1228,6 +1282,9 @@ public:
 	virtual void	UpdateOnRemove(void);
 	void	PrimaryAttack();
 	void	SecondaryAttack();
+#ifdef RTSL
+	void	TertiaryAttack();
+#endif
 	void	WeaponIdle();
 	void	ItemPreFrame();
 	void	ItemPostFrame();
@@ -1279,11 +1336,17 @@ protected:
 	void	CheckForTarget( void );
 	FindObjectResult_t		FindObject( void );
 	void					FindObjectTrace( CBasePlayer *pPlayer, trace_t *pTraceResult );
+#ifdef RTSL
+	void					FindObjectTraceFreeze( CBasePlayer *pPlayer, trace_t *pTraceResult );
+#endif
 	CBaseEntity *MegaPhysCannonFindObjectInCone( const Vector &vecOrigin, const Vector &vecDir, float flCone, float flCombineBallCone, bool bOnlyCombineBalls );
 	CBaseEntity *FindObjectInCone( const Vector &vecOrigin, const Vector &vecDir, float flCone );
 	bool	AttachObject( CBaseEntity *pObject, const Vector &vPosition );
 	void	UpdateObject( void );
 	void	DetachObject( bool playSound = true, bool wasLaunched = false );
+#ifdef RTSL
+	void	FreezeObject( void );
+#endif
 	void	LaunchObject( const Vector &vecDir, float flForce );
 	void	StartEffects( void );	// Initialize all sprites and beams
 	void	StopEffects( bool stopSound = true );	// Hide all effects temporarily
@@ -1293,6 +1356,11 @@ protected:
 	void	PuntNonVPhysics( CBaseEntity *pEntity, const Vector &forward, trace_t &tr );
 	void	PuntVPhysics( CBaseEntity *pEntity, const Vector &forward, trace_t &tr );
 	void	PuntRagdoll( CBaseEntity *pEntity, const Vector &forward, trace_t &tr );
+
+#ifdef RTSL
+	// Freeze a physics object
+	bool	FreezePhysicsObject( CBaseEntity *pEntity );
+#endif
 
 	// Velocity-based throw common to punt and launch code.
 	void	ApplyVelocityBasedForce( CBaseEntity *pEntity, const Vector &forward, const Vector &vecHitPos, PhysGunForce_t reason );
@@ -1321,6 +1389,10 @@ protected:
 	{
 		return PlayerHasMegaPhysCannon();
 	}
+
+#ifdef RTSL
+	bool PlayerHasFreezeModule();
+#endif
 
 	// Sprite scale factor
 	float	SpriteScaleFactor();
@@ -1367,6 +1439,12 @@ protected:
 	int					m_EffectState;		// Current state of the effects on the gun
 
 	bool				m_bPhyscannonState;
+
+#ifdef RTSL
+	bool				m_bPhyscannonFreezeModuleState;
+
+	float				m_flNextTertiaryAttack;
+#endif
 
 	// A list of the objects thrown or punted recently, and the time done so.
 	CUtlVector< thrown_objects_t >	m_ThrownEntities;
@@ -1419,6 +1497,10 @@ BEGIN_DATADESC( CWeaponPhysCannon )
 	DEFINE_FIELD( m_hBlastSprite, FIELD_EHANDLE ),
 	DEFINE_FIELD( m_flLastDenySoundPlayed, FIELD_BOOLEAN ),
 	DEFINE_FIELD( m_bPhyscannonState, FIELD_BOOLEAN ),
+#ifdef RTSL
+	DEFINE_FIELD( m_bPhyscannonFreezeModuleState, FIELD_BOOLEAN ),
+	DEFINE_FIELD( m_flNextTertiaryAttack, FIELD_TIME ),
+#endif
 	DEFINE_SOUNDPATCH( m_sndMotor ),
 
 	DEFINE_EMBEDDED( m_grabController ),
@@ -1478,6 +1560,10 @@ CWeaponPhysCannon::CWeaponPhysCannon( void )
 	m_flEndSpritesOverride[1] = 0.0f;
 
 	m_bPhyscannonState = false;
+#ifdef RTSL
+	m_bPhyscannonFreezeModuleState = false;
+	m_flNextTertiaryAttack = 0.f;
+#endif
 }
 
 //-----------------------------------------------------------------------------
@@ -1504,6 +1590,9 @@ void CWeaponPhysCannon::Precache( void )
 
 	PrecacheScriptSound( "Weapon_PhysCannon.HoldSound" );
 	PrecacheScriptSound( "Weapon_Physgun.Off" );
+#ifdef RTSl
+	PrecacheScriptSound( "Weapon_Physgun.FreezeSound" );
+#endif
 
 	PrecacheScriptSound( "Weapon_MegaPhysCannon.DryFire" );
 	PrecacheScriptSound( "Weapon_MegaPhysCannon.Launch" );
@@ -1527,6 +1616,9 @@ void CWeaponPhysCannon::Spawn( void )
 	CollisionProp()->UseTriggerBounds( false );
 
 	m_bPhyscannonState = IsMegaPhysCannon();
+#ifdef RTSL
+	m_bPhyscannonFreezeModuleState = PlayerHasFreezeModule();
+#endif
 
 	// The megacannon uses a different skin
 	if ( IsMegaPhysCannon() )
@@ -1547,6 +1639,9 @@ void CWeaponPhysCannon::OnRestore()
 	m_grabController.OnRestore();
 
 	m_bPhyscannonState = IsMegaPhysCannon();
+#ifdef RTSL
+	m_bPhyscannonFreezeModuleState = PlayerHasFreezeModule();
+#endif
 
 	// Tracker 8106:  Physcannon effects disappear through level transition, so
 	//  just recreate any effects here
@@ -1565,6 +1660,13 @@ void CWeaponPhysCannon::UpdateOnRemove(void)
 	BaseClass::UpdateOnRemove();
 }
 
+#ifdef RTSL
+bool CWeaponPhysCannon::PlayerHasFreezeModule()
+{
+	CHL2_Player *pPlayer = dynamic_cast<CHL2_Player*>( GetOwner() );
+	return pPlayer && pPlayer->PlayerHasGGFreezeModule();
+}
+#endif
 
 //-----------------------------------------------------------------------------
 // Sprite scale factor
@@ -1600,11 +1702,6 @@ bool CWeaponPhysCannon::Deploy( void )
 //-----------------------------------------------------------------------------
 void CWeaponPhysCannon::SetViewModel( void )
 {
-	if ( !IsMegaPhysCannon() )
-	{
-		BaseClass::SetViewModel();
-		return;
-	}
 
 	CBasePlayer *pOwner = ToBasePlayer( GetOwner() );
 	if ( pOwner == NULL )
@@ -1614,7 +1711,19 @@ void CWeaponPhysCannon::SetViewModel( void )
 	if ( vm == NULL )
 		return;
 
-	vm->SetWeaponModel( MEGACANNON_MODEL, this );
+	if ( !IsMegaPhysCannon() )
+		BaseClass::SetViewModel();
+	else
+		vm->SetWeaponModel( MEGACANNON_MODEL, this );
+
+	if ( m_bPhyscannonFreezeModuleState )
+	{
+		vm->SetBodygroup( FREEZEMODULE_BODYGROUP, FREEZEMODULE_INDEX );
+	}
+	else
+	{
+		vm->SetBodygroup( FREEZEMODULE_BODYGROUP, 0 );
+	}
 }
 
 //-----------------------------------------------------------------------------
@@ -2216,7 +2325,11 @@ void CWeaponPhysCannon::PrimaryAttack( void )
 		if( GetOwner()->IsPlayer() && !IsMegaPhysCannon() )
 		{
 			// Don't let the player zap any NPC's except regular antlions and headcrabs.
+#ifdef RTSL
+			if( pEntity->IsNPC() && pEntity->Classify() != CLASS_HEADCRAB && !FClassnameIs(pEntity, "npc_antlion") && !FClassnameIs( pEntity, "npc_headcrab_mecha" ) )
+#else
 			if( pEntity->IsNPC() && pEntity->Classify() != CLASS_HEADCRAB && !FClassnameIs(pEntity, "npc_antlion") )
+#endif
 			{
 				DryFire();
 				return;
@@ -2294,6 +2407,9 @@ void CWeaponPhysCannon::SecondaryAttack( void )
 		// Drop the held object
 		m_flNextPrimaryAttack = gpGlobals->curtime + 0.5;
 		m_flNextSecondaryAttack = gpGlobals->curtime + 0.5;
+#ifdef RTSL
+		m_flNextTertiaryAttack = gpGlobals->curtime + 0.5;
+#endif
 
 		DetachObject();
 
@@ -2349,6 +2465,104 @@ void CWeaponPhysCannon::WeaponIdle( void )
 		}
 	}
 }
+
+#ifdef RTSL
+//-----------------------------------------------------------------------------
+// Purpose: Click tertiary attack whilst holding an object to freeze it
+//-----------------------------------------------------------------------------
+void CWeaponPhysCannon::TertiaryAttack( void )
+{
+	if ( m_flNextTertiaryAttack > gpGlobals->curtime )
+		return;
+
+	if ( !m_bPhyscannonFreezeModuleState )
+		return;
+
+	CBasePlayer *pOwner = ToBasePlayer( GetOwner() );
+
+	if ( pOwner == NULL )
+		return;
+
+	// If not active, just issue a physics punch in the world.
+	m_flNextTertiaryAttack = gpGlobals->curtime + 0.5f;
+
+	// See if we should drop a held item
+	if ( ( m_bActive ) && ( pOwner->m_afButtonPressed & IN_ATTACK3 ) )
+	{
+		// Freeze the held object
+		m_flNextPrimaryAttack = gpGlobals->curtime + 0.5;
+		m_flNextSecondaryAttack = gpGlobals->curtime + 0.5;
+		m_flNextTertiaryAttack = gpGlobals->curtime + 0.5;
+
+		FreezeObject();
+
+		if ( !IsMegaPhysCannon() )
+		{
+			DoEffect( EFFECT_READY );
+		}
+		else
+		{
+			DoMegaEffect( EFFECT_READY );
+		}
+
+
+
+		SendWeaponAnim( ACT_VM_PRIMARYATTACK );
+		EmitSound( "Weapon_Physgun.FreezeSound" );
+	}
+	else
+	{
+		//We are not holding anything, see if there is a valid object within range we can freeze or defreeze
+		trace_t tr;
+		FindObjectTraceFreeze( pOwner, &tr );
+		float dist = ( tr.endpos - tr.startpos ).Length();
+
+		//Hit
+		if ( ( tr.fraction != 1.0f ) && ( tr.m_pEnt ) && ( tr.m_pEnt->IsWorld() == false ) && ( dist <= TraceLength() ) )
+		{
+			CBaseEntity *pEntity = tr.m_pEnt;
+			CPhysBox *pPhysBox = dynamic_cast<CPhysBox*>( pEntity );
+			CPhysicsProp *pPhysics = dynamic_cast<CPhysicsProp*>( pEntity );
+
+			if ( pPhysBox != NULL || pPhysics != NULL )
+			{
+				bool bPlayAnimation = FreezePhysicsObject( pEntity );
+				if ( bPlayAnimation )
+				{
+					Vector	center = pEntity->WorldSpaceCenter();
+					if ( !IsMegaPhysCannon() )
+					{
+						DoEffect( EFFECT_LAUNCH, &center );
+					}
+					else
+					{
+						DoMegaEffect( EFFECT_LAUNCH, &center );
+					}
+
+					SendWeaponAnim( ACT_VM_PRIMARYATTACK );
+					EmitSound( "Weapon_Physgun.FreezeSound" );
+					return;
+				}
+				else
+				{
+					DryFire();
+					return;
+				}
+			}
+			else
+			{
+				DryFire();
+				return;
+			}
+		}
+		else
+		{
+			DryFire();
+			return;
+		}
+	}
+}
+#endif
 
 //-----------------------------------------------------------------------------
 // Purpose:
@@ -2490,6 +2704,33 @@ void CWeaponPhysCannon::FindObjectTrace( CBasePlayer *pPlayer, trace_t *pTraceRe
 	}
 }
 
+#ifdef RTSL
+void CWeaponPhysCannon::FindObjectTraceFreeze( CBasePlayer *pPlayer, trace_t *pTraceResult )
+{
+	Vector forward;
+	pPlayer->EyeVectors( &forward );
+
+	// Setup our positions
+	Vector	start = pPlayer->Weapon_ShootPosition();
+	float	testLength = TraceLength() * 4.0f;
+	Vector	end = start + forward * testLength;
+
+	if ( IsMegaPhysCannon() && hl2_episodic.GetBool() )
+	{
+		Vector vecAutoAimDir = pPlayer->GetAutoaimVector( 1.0f, testLength );
+		end = start + vecAutoAimDir * testLength;
+	}
+
+	// Try to find an object by looking straight ahead
+	UTIL_PhyscannonTraceLineUnFreeze( start, end, pPlayer, pTraceResult );
+
+	// Try again with a hull trace
+	if ( !pTraceResult->DidHitNonWorldEntity() )
+	{
+		UTIL_PhyscannonTraceHull( start, end, -Vector( 4, 4, 4 ), Vector( 4, 4, 4 ), pPlayer, pTraceResult );
+	}
+}
+#endif
 
 CWeaponPhysCannon::FindObjectResult_t CWeaponPhysCannon::FindObject( void )
 {
@@ -2861,6 +3102,104 @@ void CWeaponPhysCannon::UpdateObject( void )
 	}
 }
 
+#ifdef RTSL//This is the part where we freeze a physics object
+bool CWeaponPhysCannon::FreezePhysicsObject( CBaseEntity *pEntity )
+{
+	// Get the physics object (MUST have one)
+	IPhysicsObject *pPhysicsObject = pEntity->VPhysicsGetObject();
+	if ( pPhysicsObject == NULL )
+	{
+		Assert( 0 );
+		return false;
+	}
+
+	// Affect the object
+	CPhysBox *pPhysBox = dynamic_cast<CPhysBox*>( pEntity );
+	CPhysicsProp *pPhysics = dynamic_cast<CPhysicsProp*>( pEntity );
+
+	//Don't allow vehicles to be frozen
+	if ( !pEntity->GetServerVehicle() )
+	{
+		if ( pPhysBox != NULL )
+		{
+			//this is a func_physbox
+			//we do not allow unfreezing of props placed in disabled motion state by the mapper
+			if ( !pPhysBox->IsFrozenByPhyscannon() && pPhysBox->VPhysicsGetObject()->IsMotionEnabled() )
+			{
+				//Object has motion and is not frozen by GG. We are allowed to freeze it.
+				pPhysBox->SetPhyscannonFreezeMotion( false );
+				if ( !IsMegaPhysCannon() )
+				{
+					pPhysBox->SetGlow( true, RTSL_GravityGunFreezeColor );
+				}
+				else
+				{
+					pPhysBox->SetGlow( true, RTSL_GravityGunFreezeColor );
+				}
+
+				return true;
+			}
+			else if ( pPhysBox->IsFrozenByPhyscannon() )
+			{
+				//This is frozen by GG. We are allowed to unfreeze it.
+				pPhysBox->SetPhyscannonFreezeMotion( true );
+				pPhysBox->SetGlow( false, Color( 0, 0, 0 ) );
+				return true;
+			}
+		}
+		else if ( pPhysics != NULL )
+		{
+			//this is a prop_physics
+			//we do not allow unfreezing of props placed in disabled motion state by the mapper
+			if ( !pPhysics->IsFrozenByPhyscannon() && pPhysics->VPhysicsGetObject()->IsMotionEnabled() )
+			{
+				//Object has motion and is not frozen by GG. We are allowed to freeze it.
+				pPhysics->SetPhyscannonFreezeMotion( false );
+				if ( !IsMegaPhysCannon() )
+				{
+					pPhysics->SetGlow( true, RTSL_GravityGunFreezeColor );
+				}
+				else
+				{
+					pPhysics->SetGlow( true, RTSL_GravityGunFreezeColor );
+				}
+				return true;
+			}
+			else if ( pPhysics->IsFrozenByPhyscannon() )
+			{
+				//This is frozen by GG. We are allowed to unfreeze it.
+				pPhysics->SetPhyscannonFreezeMotion( true );
+				pPhysics->SetGlow( false, Color( 0, 0, 0 ) );
+				return true;
+			}
+		}
+	}
+
+	return false;
+}
+
+//Player is requesting an object to be frozen. We detach it from the GG and freeze it.
+void CWeaponPhysCannon::FreezeObject( void )
+{
+	if ( m_grabController.GetAttached() )
+	{
+		CBaseEntity *pObject = m_grabController.GetAttached();
+		DetachObject( false, false );
+
+		// Freeze
+		FreezePhysicsObject( pObject );
+
+		// Don't allow the gun to regrab a thrown object!!
+		m_flNextTertiaryAttack = m_flNextPrimaryAttack = gpGlobals->curtime + 0.5;
+
+		Vector	center = pObject->WorldSpaceCenter();
+
+		//Do repulse effect
+		DoEffect( EFFECT_LAUNCH, &center );
+	}
+}
+#endif
+
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 void CWeaponPhysCannon::DetachObject( bool playSound, bool wasLaunched )
@@ -3088,6 +3427,15 @@ void CWeaponPhysCannon::DoEffectIdle( void )
 
 	if ( pOwner == NULL )
 		return;
+
+#ifdef RTSL
+	//The module can be removed with weaponstrip, so it's just as good to leave it like this
+	if ( m_bPhyscannonFreezeModuleState != PlayerHasFreezeModule() )
+	{
+		m_bPhyscannonFreezeModuleState = PlayerHasFreezeModule();
+		SendWeaponAnim( ACT_VM_DRAW );
+	}
+#endif
 
 	if ( m_bPhyscannonState != IsMegaPhysCannon() )
 	{
@@ -3330,6 +3678,12 @@ void CWeaponPhysCannon::ItemPostFrame()
 	{
 		PrimaryAttack();
 	}
+#ifdef RTSL
+	else if ( pOwner->m_nButtons & IN_ATTACK3 )
+	{
+		TertiaryAttack();
+	}
+#endif
 	else
 	{
 		WeaponIdle();

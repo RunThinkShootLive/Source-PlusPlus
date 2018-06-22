@@ -206,11 +206,6 @@ IMPLEMENT_CLIENTCLASS_DT(C_BaseAnimating, DT_BaseAnimating, CBaseAnimating)
 	RecvPropFloat( RECVINFO( m_fadeMaxDist ) ),
 	RecvPropFloat( RECVINFO( m_flFadeScale ) ),
 
-#ifdef GLOWS_ENABLE
-	RecvPropBool( RECVINFO( m_bGlowEnabled ) ),
-	RecvPropInt( RECVINFO( m_clrRender ) ),
-#endif // GLOWS_ENABLE
-
 END_RECV_TABLE()
 
 BEGIN_PREDICTION_DATA( C_BaseAnimating )

@@ -2418,6 +2418,10 @@ BEGIN_DATADESC( CPhysicsProp )
 	DEFINE_INPUTFUNC( FIELD_VOID, "Wake", InputWake ),
 	DEFINE_INPUTFUNC( FIELD_VOID, "Sleep", InputSleep ),
 	DEFINE_INPUTFUNC( FIELD_VOID, "DisableFloating", InputDisableFloating ),
+#ifdef RTSL
+	DEFINE_INPUTFUNC( FIELD_VOID, "GGFreeze", InputGGFreeze ),
+	DEFINE_INPUTFUNC( FIELD_VOID, "GGUnFreeze", InputGGUnfreeze ),
+#endif
 
 	DEFINE_FIELD( m_bAwake, FIELD_BOOLEAN ),
 
@@ -2440,6 +2444,9 @@ BEGIN_DATADESC( CPhysicsProp )
 
 	DEFINE_FIELD( m_bThrownByPlayer, FIELD_BOOLEAN ),
 	DEFINE_FIELD( m_bFirstCollisionAfterLaunch, FIELD_BOOLEAN ),
+#ifdef RTSL
+	DEFINE_FIELD( m_bFrozenByPhyscannon, FIELD_BOOLEAN ),
+#endif
 
 	DEFINE_THINKFUNC( ClearFlagsThink ),
 
@@ -2477,6 +2484,15 @@ bool CPhysicsProp::IsGib()
 	return (m_spawnflags & SF_PHYSPROP_IS_GIB) ? true : false;
 }
 
+#ifdef RTSL
+void CPhysicsProp::OnRestore()
+{
+	BaseClass::OnRestore();
+	if ( m_bFrozenByPhyscannon )
+		SetGlow( true, RTSL_GravityGunFreezeColor );
+}
+#endif
+
 //-----------------------------------------------------------------------------
 // Purpose: Create a physics object for this prop
 //-----------------------------------------------------------------------------
@@ -2493,6 +2509,9 @@ void CPhysicsProp::Spawn( )
 	}
 
 	BaseClass::Spawn();
+#ifdef RTSL
+	m_bFrozenByPhyscannon = false;
+#endif
 
 	if ( IsMarkedForDeletion() )
 		return;
@@ -2600,6 +2619,13 @@ bool CPhysicsProp::CreateVPhysics()
 		if ( HasSpawnFlags( SF_PHYSPROP_MOTIONDISABLED ) || m_damageToEnableMotion > 0 || m_flForceToEnableMotion > 0 )
 		{
 			pPhysicsObject->EnableMotion( false );
+#ifdef RTSL
+			if ( HasSpawnFlags( SF_PHYSPROP_GRAVITY_GUN_FROZEN ) )
+			{
+				m_bFrozenByPhyscannon = true;
+				SetGlow( true, RTSL_GravityGunFreezeColor );
+			}
+#endif
 		}
 	}
 
@@ -2710,6 +2736,58 @@ void CPhysicsProp::InputDisableFloating( inputdata_t &inputdata )
 	PhysEnableFloating( VPhysicsGetObject(), false );
 }
 
+#ifdef RTSL
+//-----------------------------------------------------------------------------
+// Purpose: RTSL: Disable physics motion and set the object state as frozen. (unfreezable by the Gravity Gun's tertiary attack)
+//-----------------------------------------------------------------------------
+void CPhysicsProp::InputGGFreeze( inputdata_t &inputdata )
+{
+	SetPhyscannonFreezeMotion( false );
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: RTSL: Enable physics motion and set the object as unfrozen.
+//-----------------------------------------------------------------------------
+void CPhysicsProp::InputGGUnfreeze( inputdata_t &inputdata )
+{
+	SetPhyscannonFreezeMotion( true );
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Return true if this physbox has been frozen by the gravity gun
+//-----------------------------------------------------------------------------
+bool CPhysicsProp::IsFrozenByPhyscannon()
+{
+	return m_bFrozenByPhyscannon;
+}
+
+//-----------------------------------------------------------------------------
+// Purpose: Set motion on the physbox and register that it has been altered by the gravity gun's freeze module
+//-----------------------------------------------------------------------------
+void CPhysicsProp::SetPhyscannonFreezeMotion( bool state )
+{
+	IPhysicsObject *pPhysicsObject = VPhysicsGetObject();
+	if ( !pPhysicsObject )
+		return;
+
+	//Freeze or unfreeze it
+	pPhysicsObject->EnableMotion( state );
+	if ( state )
+	{
+		pPhysicsObject->Wake();
+		m_bFrozenByPhyscannon = false;
+		SetGlow( false, RTSL_GravityGunFreezeColor );
+	}
+	else
+	{
+		m_bFrozenByPhyscannon = true;
+		SetGlow( true, RTSL_GravityGunFreezeColor );
+	}
+
+	return;
+}
+#endif
+
 //-----------------------------------------------------------------------------
 // Purpose:
 //-----------------------------------------------------------------------------
@@ -2749,7 +2827,11 @@ void CPhysicsProp::OnPhysGunPickup( CBasePlayer *pPhysGunUser, PhysGunPickup_t r
 		if ( !HasSpawnFlags( SF_PHYSPROP_ENABLE_ON_PHYSCANNON ) )
 			return;
 
+#ifndef RTSL
 		EnableMotion();
+#else
+		SetPhyscannonFreezeMotion( true );
+#endif
 
 		if( HasInteraction( PROPINTER_PHYSGUN_WORLD_STICK ) )
 		{

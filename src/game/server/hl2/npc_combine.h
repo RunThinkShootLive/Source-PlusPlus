@@ -1,6 +1,6 @@
 //========= Copyright Valve Corporation, All rights reserved. ============//
 //
-// Purpose: 
+// Purpose:
 //
 //=============================================================================//
 
@@ -126,7 +126,7 @@ public:
 	// Sounds
 	// -------------
 	void			DeathSound( void );
-	void			PainSound( void );
+	void			PainSound( const CTakeDamageInfo& info );
 	void			IdleSound( void );
 	void			AlertSound( void );
 	void			LostEnemySound( void );
@@ -198,7 +198,7 @@ private:
 	//=========================================================
 	// Combine Tasks
 	//=========================================================
-	enum 
+	enum
 	{
 		TASK_COMBINE_FACE_TOSS_DIR = BaseClass::NEXT_TASK,
 		TASK_COMBINE_IGNORE_ATTACKS,
@@ -265,7 +265,7 @@ private:
 	// Time Variables
 	float			m_flNextPainSoundTime;
 	float			m_flNextAlertSoundTime;
-	float			m_flNextGrenadeCheck;	
+	float			m_flNextGrenadeCheck;
 	float			m_flNextLostSoundTime;
 	float			m_flAlertPatrolTime;		// When to stop doing alert patrol
 	float			m_flNextAltFireTime;		// Elites only. Next time to begin considering alt-fire attack.

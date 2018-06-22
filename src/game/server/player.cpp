@@ -85,6 +85,10 @@
 #include "fogvolume.h"
 #include "colorcorrection.h"
 
+#ifdef RTSL
+#include "hl2_player.h"
+#endif
+
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
@@ -7642,6 +7646,9 @@ class CStripWeapons : public CPointEntity
 public:
 	void InputStripWeapons(inputdata_t &data);
 	void InputStripWeaponsAndSuit(inputdata_t &data);
+#ifdef RTSL
+	void InputStripGGFreezeModule( inputdata_t &data );
+#endif
 
 	void StripWeapons(inputdata_t &data, bool stripSuit);
 	DECLARE_DATADESC();
@@ -7652,6 +7659,9 @@ LINK_ENTITY_TO_CLASS( player_weaponstrip, CStripWeapons );
 BEGIN_DATADESC( CStripWeapons )
 	DEFINE_INPUTFUNC( FIELD_VOID, "Strip", InputStripWeapons ),
 	DEFINE_INPUTFUNC( FIELD_VOID, "StripWeaponsAndSuit", InputStripWeaponsAndSuit ),
+#ifdef RTSL
+	DEFINE_INPUTFUNC( FIELD_VOID, "StripGGFreezeModule", InputStripGGFreezeModule ),
+#endif
 END_DATADESC()
 
 
@@ -7664,6 +7674,30 @@ void CStripWeapons::InputStripWeaponsAndSuit(inputdata_t &data)
 {
 	StripWeapons(data, true);
 }
+
+#ifdef RTSL
+void CStripWeapons::InputStripGGFreezeModule( inputdata_t &data )
+{
+	CBasePlayer *pPlayer = NULL;
+	if ( data.pActivator && data.pActivator->IsPlayer() )
+	{
+		pPlayer = ( CBasePlayer * )data.pActivator;
+	}
+	else if ( !g_pGameRules->IsDeathmatch() )
+	{
+		pPlayer = UTIL_GetLocalPlayer();
+	}
+
+	if ( pPlayer )
+	{
+		CHL2_Player *pHL2Player = dynamic_cast<CHL2_Player *>( pPlayer );
+		if ( pHL2Player )
+		{
+			pHL2Player->RemoveGGFreezeModule();
+		}
+	}
+}
+#endif
 
 void CStripWeapons::StripWeapons(inputdata_t &data, bool stripSuit)
 {

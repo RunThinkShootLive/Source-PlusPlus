@@ -1,6 +1,6 @@
 //========= Copyright Valve Corporation, All rights reserved. ============//
 //
-// Purpose: 
+// Purpose:
 //
 // $NoKeywords: $
 //=============================================================================//
@@ -37,6 +37,7 @@
 #define SF_PHYSBOX_NEVER_PICK_UP			0x200000		// Physcannon will never be able to pick this up.
 #define SF_PHYSBOX_NEVER_PUNT				0x400000		// Physcannon will never be able to punt this object.
 #define SF_PHYSBOX_PREVENT_PLAYER_TOUCH_ENABLE 0x800000		// If set, the player will not cause the object to enable its motion when bumped into
+#define SF_PHYSBOX_GRAVITY_GUN_FROZEN		0x1600000		// If set, a motion disabled physbox can be unfrozen using the gravity gun tertiary attack
 
 // UNDONE: Hook collisions into the physics system to generate touch functions and take damage on falls
 // UNDONE: Base class PhysBrush
@@ -50,9 +51,13 @@ public:
 	void	Spawn ( void );
 	bool	CreateVPhysics();
 	void	Move( const Vector &force );
+
+#ifdef RTSL
+	virtual void OnRestore();
+#endif
 	virtual int ObjectCaps();
 	virtual void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
-	
+
 	virtual int DrawDebugTextOverlays(void);
 
 	virtual void VPhysicsUpdate( IPhysicsObject *pPhysics );
@@ -61,6 +66,10 @@ public:
 	void		 EnableMotion( void );
 
 	bool CanBePickedUpByPhyscannon();
+#ifdef RTSL
+	bool IsFrozenByPhyscannon();
+	void SetPhyscannonFreezeMotion( bool );
+#endif
 
 	// IPlayerPickupVPhysics
 	virtual void OnPhysGunPickup( CBasePlayer *pPhysGunUser, PhysGunPickup_t reason );
@@ -76,9 +85,13 @@ public:
 	void InputDisableMotion( inputdata_t &inputdata );
 	void InputForceDrop( inputdata_t &inputdata );
 	void InputDisableFloating( inputdata_t &inputdata );
+#ifdef RTSL
+	void InputGGFreeze( inputdata_t &inputdata );
+	void InputGGUnfreeze( inputdata_t &inputdata );
+#endif
 
 	DECLARE_DATADESC();
-	
+
 protected:
 	int				m_damageType;
 	float			m_massScale;
@@ -87,6 +100,9 @@ protected:
 	float			m_flForceToEnableMotion;
 	QAngle			m_angPreferredCarryAngles;
 	bool			m_bNotSolidToWorld;
+#ifdef RTSL
+	bool			m_bFrozenByPhyscannon;
+#endif
 
 	// Outputs
 	COutputEvent	m_OnDamaged;
@@ -123,15 +139,15 @@ public:
 
 	DECLARE_DATADESC();
 private:
-	
+
 	float		GetRadius( void );
 
 	float		m_damage;
 	float		m_radius;
 	string_t	m_targetEntityName;
 	float		m_flInnerRadius;
-	
-	COutputEvent	m_OnPushedPlayer;	
+
+	COutputEvent	m_OnPushedPlayer;
 };
 
 
@@ -162,7 +178,7 @@ private:
 };
 
 //-----------------------------------------------------------------------------
-// Purpose: A magnet that creates constraints between itself and anything it touches 
+// Purpose: A magnet that creates constraints between itself and anything it touches
 //-----------------------------------------------------------------------------
 
 struct magnetted_objects_t
@@ -211,7 +227,7 @@ public:
 // IPhysicsConstraintEvent
 public:
 	void	ConstraintBroken( IPhysicsConstraint *pConstraint );
-	
+
 protected:
 	// Outputs
 	COutputEvent	m_OnMagnetAttach;

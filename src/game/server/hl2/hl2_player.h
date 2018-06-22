@@ -64,11 +64,11 @@ private:
 public:
 	int		GetDeviceID( void ) const { return m_bitsDeviceID; }
 	float	GetDeviceDrainRate( void ) const
-	{	
+	{
 		if( g_pGameRules->GetSkillLevel() == SKILL_EASY && hl2_episodic.GetBool() && !(GetDeviceID()&bits_SUIT_DEVICE_SPRINT) )
 			return m_flDrainRate * 0.5f;
 		else
-			return m_flDrainRate; 
+			return m_flDrainRate;
 	}
 };
 
@@ -82,7 +82,7 @@ public:
 
 	CHL2_Player();
 	~CHL2_Player( void );
-	
+
 	static CHL2_Player *CreatePlayer( const char *className, edict_t *ed )
 	{
 		CHL2_Player::s_PlayerEdict = ed;
@@ -136,7 +136,7 @@ public:
 	bool SuitPower_RemoveDevice( const CSuitPowerDevice &device );
 	bool SuitPower_ShouldRecharge( void );
 	float SuitPower_GetCurrentPercentage( void ) { return m_HL2Local.m_flSuitPower; }
-	
+
 	void SetFlashlightEnabled( bool bState );
 
 	// Apply a battery
@@ -212,7 +212,7 @@ public:
 
 	virtual int			GiveAmmo( int nCount, int nAmmoIndex, bool bSuppressSound);
 	virtual bool		BumpWeapon( CBaseCombatWeapon *pWeapon );
-	
+
 	virtual bool		Weapon_CanUse( CBaseCombatWeapon *pWeapon );
 	virtual void		Weapon_Equip( CBaseCombatWeapon *pWeapon );
 	virtual bool		Weapon_Lower( void );
@@ -259,24 +259,30 @@ public:
 	virtual void RemoveSuit( void );
 	void  HandleAdmireGlovesAnimation( void );
 	void  StartAdmireGlovesAnimation( void );
-	
+
 	void  HandleSpeedChanges( void );
 
 	void SetControlClass( Class_T controlClass ) { m_nControlClass = controlClass; }
-	
+
 	void StartWaterDeathSounds( void );
 	void StopWaterDeathSounds( void );
 
 	bool IsWeaponLowered( void ) { return m_HL2Local.m_bWeaponLowered; }
 	void HandleArmorReduction( void );
-	void StartArmorReduction( void ) { m_flArmorReductionTime = gpGlobals->curtime + ARMOR_DECAY_TIME; 
-									   m_iArmorReductionFrom = ArmorValue(); 
+	void StartArmorReduction( void ) { m_flArmorReductionTime = gpGlobals->curtime + ARMOR_DECAY_TIME;
+									   m_iArmorReductionFrom = ArmorValue();
 									 }
 
 	void MissedAR2AltFire();
 
 	inline void EnableCappedPhysicsDamage();
 	inline void DisableCappedPhysicsDamage();
+
+#ifdef RTSL
+	virtual bool EquipGGFreezeModule( void );
+	virtual bool RemoveGGFreezeModule( void );
+	virtual bool PlayerHasGGFreezeModule( void );
+#endif
 
 	// HUD HINTS
 	void DisplayLadderHudHint();
@@ -300,7 +306,7 @@ private:
 	void				OnSquadMemberKilled( inputdata_t &data );
 
 	Class_T				m_nControlClass;			// Class when player is controlling another entity
-	// This player's HL2 specific data that should only be replicated to 
+	// This player's HL2 specific data that should only be replicated to
 	//  the player and not to other players.
 	CNetworkVarEmbedded( CHL2PlayerLocalData, m_HL2Local );
 
@@ -308,7 +314,7 @@ private:
 
 	bool				m_bSprintEnabled;		// Used to disable sprint temporarily
 	bool				m_bIsAutoSprinting;		// A proxy for holding down the sprint key.
-	float				m_fAutoSprintMinTime;	// Minimum time to maintain autosprint regardless of player speed. 
+	float				m_fAutoSprintMinTime;	// Minimum time to maintain autosprint regardless of player speed.
 
 	CNetworkVar( bool, m_fIsSprinting );
 	CNetworkVarForDerived( bool, m_fIsWalking );
@@ -346,7 +352,7 @@ private:
 
 	bool				m_bFlashlightDisabled;
 	bool				m_bUseCappedPhysicsDamageTable;
-	
+
 	float				m_flArmorReductionTime;
 	int					m_iArmorReductionFrom;
 
@@ -360,7 +366,7 @@ private:
 	EHANDLE				m_hLocatorTargetEntity; // The entity that's being tracked by the suit locator.
 
 	float				m_flTimeNextLadderHint;	// Next time we're eligible to display a HUD hint about a ladder.
-	
+
 	friend class CHL2GameMovement;
 };
 

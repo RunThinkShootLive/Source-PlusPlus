@@ -1,6 +1,6 @@
 //========= Copyright Valve Corporation, All rights reserved. ============//
 //
-// Purpose: 
+// Purpose:
 //
 // $NoKeywords: $
 //=============================================================================//
@@ -48,6 +48,9 @@ BEGIN_SIMPLE_DATADESC( CHL2PlayerLocalData )
 	DEFINE_FIELD( m_flFlashBattery, FIELD_FLOAT ),
 	DEFINE_FIELD( m_vecLocatorOrigin, FIELD_POSITION_VECTOR ),
 #endif
+#ifdef RTSL
+	DEFINE_FIELD( m_bHasGGFreezeModule, FIELD_BOOLEAN ),
+#endif
 	// Ladder related stuff
 	DEFINE_FIELD( m_hLadder, FIELD_EHANDLE ),
 	DEFINE_EMBEDDED( m_LadderMove ),
@@ -64,6 +67,9 @@ CHL2PlayerLocalData::CHL2PlayerLocalData()
 	m_bDisplayReticle = false;
 #ifdef HL2_EPISODIC
 	m_flFlashBattery = 0.0f;
+#endif
+#ifdef RTSL
+	m_bHasGGFreezeModule = false;
 #endif
 }
 

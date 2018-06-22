@@ -20,6 +20,10 @@
 ConVar glow_outline_effect_enable( "glow_outline_effect_enable", "1", FCVAR_ARCHIVE, "Enable entity outline glow effects." );
 ConVar glow_outline_effect_width( "glow_outline_width", "10.0f", FCVAR_CHEAT, "Width of glow outline effect in screen space." );
 
+#ifdef RTSL
+ConVar physcannon_tracelength( "physcannon_tracelength", "250" );
+#endif
+
 extern bool g_bDumpRenderTargets; // in viewpostprocess.cpp
 
 CGlowObjectManager g_GlowObjectManager;
@@ -134,7 +138,7 @@ void CGlowObjectManager::RenderGlowModels( const CViewSetup *pSetup, int nSplitS
 		render->SetColorModulation( &vGlowColor[0] ); // This only sets rgb, not alpha
 
 		m_GlowObjectDefinitions[i].DrawModel();
-	}	
+	}
 
 	if ( g_bDumpRenderTargets )
 	{
@@ -144,7 +148,7 @@ void CGlowObjectManager::RenderGlowModels( const CViewSetup *pSetup, int nSplitS
 	g_pStudioRender->ForcedMaterialOverride( NULL );
 	render->SetColorModulation( vOrigColor.Base() );
 	render->SetBlend( flOrigBlend );
-	
+
 	ShaderStencilState_t stencilStateDisable;
 	stencilStateDisable.m_bEnable = false;
 	stencilStateDisable.SetStencilState( pRenderContext );
@@ -170,11 +174,19 @@ void CGlowObjectManager::ApplyEntityGlowEffects( const CViewSetup *pSetup, int n
 	pRenderContext->OverrideDepthEnable( true, false );
 
 	int iNumGlowObjects = 0;
+#ifdef RTSL
+	const vec_t maxDist = Square( physcannon_tracelength.GetFloat() );
+#endif
 
 	for ( int i = 0; i < m_GlowObjectDefinitions.Count(); ++ i )
 	{
 		if ( m_GlowObjectDefinitions[i].IsUnused() || !m_GlowObjectDefinitions[i].ShouldDraw( nSplitScreenSlot ) )
 			continue;
+
+#ifdef RTSL
+		if ( ( m_GlowObjectDefinitions[i].m_hEntity->GetAbsOrigin() - pSetup->origin ).LengthSqr() > maxDist )
+			continue;
+#endif
 
 		if ( m_GlowObjectDefinitions[i].m_bRenderWhenOccluded || m_GlowObjectDefinitions[i].m_bRenderWhenUnoccluded )
 		{
@@ -260,13 +272,13 @@ void CGlowObjectManager::ApplyEntityGlowEffects( const CViewSetup *pSetup, int n
 		return;
 
 	//=============================================
-	// Render the glow colors to _rt_FullFrameFB 
+	// Render the glow colors to _rt_FullFrameFB
 	//=============================================
 	{
 		PIXEvent pixEvent( pRenderContext, "RenderGlowModels" );
 		RenderGlowModels( pSetup, nSplitScreenSlot, pRenderContext );
 	}
-	
+
 	// Get viewport
 	int nSrcWidth = pSetup->width;
 	int nSrcHeight = pSetup->height;

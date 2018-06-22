@@ -1,6 +1,6 @@
 //========= Copyright Valve Corporation, All rights reserved. ============//
 //
-// Purpose: 
+// Purpose:
 //
 // $NoKeywords: $
 //=============================================================================//
@@ -21,7 +21,7 @@
 // PROP TYPES
 //=============================================================================================================
 //-----------------------------------------------------------------------------
-// Purpose: 
+// Purpose:
 //-----------------------------------------------------------------------------
 class CBaseProp : public CBaseAnimating
 {
@@ -34,7 +34,7 @@ public:
 	bool KeyValue( const char *szKeyName, const char *szValue );
 	void CalculateBlockLOS( void );
 	int  ParsePropData( void );
-	
+
 	void DrawDebugGeometryOverlays( void );
 
 	// Don't treat as a live target
@@ -44,7 +44,7 @@ public:
 
 
 //-----------------------------------------------------------------------------
-// Purpose: 
+// Purpose:
 //-----------------------------------------------------------------------------
 class CBreakableProp : public CBaseProp, public IBreakableWithPropData, public CDefaultPlayerPickupVPhysics
 {
@@ -87,7 +87,7 @@ public:
 		if ( HasInteraction( PROPINTER_PHYSGUN_LAUNCH_SPIN_Z ) )
 			return true;
 
-		return false; 
+		return false;
 	}
 
 	virtual QAngle PreferredCarryAngles( void ) { return m_preferredCarryAngles; }
@@ -98,7 +98,7 @@ public:
 	void	HandleFirstCollisionInteractions( int index, gamevcollisionevent_t *pEvent );
 	void	HandleInteractionStick( int index, gamevcollisionevent_t *pEvent );
 	void	StickAtPosition( const Vector &stickPosition, const Vector &savePosition, const QAngle &saveAngles );
-	
+
 	// Disable auto fading under dx7 or when level fades are specified
 	void	DisableAutoFade();
 
@@ -174,7 +174,7 @@ protected:
 	int				m_iBreakableSkin;
 	int				m_iBreakableCount;
 	int				m_iMaxBreakableSize;
-	string_t		m_iszBasePropData;	
+	string_t		m_iszBasePropData;
 	int				m_iInteractions;
 	float			m_explodeDamage;
 	float			m_explodeRadius;
@@ -203,7 +203,7 @@ public:
 protected:
 	void SetPhysicsAttacker( CBasePlayer *pEntity, float flTime );
 	void CheckRemoveRagdolls();
-	
+
 private:
 	void InputEnablePhyscannonPickup( inputdata_t &inputdata );
 	void InputDisablePhyscannonPickup( inputdata_t &inputdata );
@@ -220,7 +220,7 @@ private:
 	{
 		PHYSGUN_MUST_BE_DETACHED = 0,
 		PHYSGUN_IS_DETACHING,
-		PHYSGUN_CAN_BE_GRABBED,					
+		PHYSGUN_CAN_BE_GRABBED,
 		PHYSGUN_ANIMATE_ON_PULL,
 		PHYSGUN_ANIMATE_IS_ANIMATING,
 		PHYSGUN_ANIMATE_FINISHED,
@@ -255,7 +255,7 @@ private:
 #define SF_DYNAMICPROP_DISABLE_COLLISION			256
 
 //-----------------------------------------------------------------------------
-// Purpose: 
+// Purpose:
 //-----------------------------------------------------------------------------
 class CDynamicProp : public CBreakableProp, public IPositionWatcher
 {
@@ -326,7 +326,7 @@ protected:
 };
 
 //-----------------------------------------------------------------------------
-// Purpose: 
+// Purpose:
 //-----------------------------------------------------------------------------
 DECLARE_AUTO_LIST( IPhysicsPropAutoList );
 class CPhysicsProp : public CBreakableProp, public IPhysicsPropAutoList, public INavAvoidanceObstacle
@@ -336,7 +336,7 @@ class CPhysicsProp : public CBreakableProp, public IPhysicsPropAutoList, public 
 
 public:
 	~CPhysicsProp();
-	CPhysicsProp( void ) 
+	CPhysicsProp( void )
 	{
 	}
 
@@ -344,6 +344,9 @@ public:
 	void Precache();
 	bool CreateVPhysics( void );
 	bool OverridePropdata( void );
+#ifdef RTSL
+	virtual void	OnRestore();
+#endif
 
 	virtual void VPhysicsUpdate( IPhysicsObject *pPhysics );
 	virtual void VPhysicsCollision( int index, gamevcollisionevent_t *pEvent );
@@ -353,9 +356,17 @@ public:
 	void InputEnableMotion( inputdata_t &inputdata );
 	void InputDisableMotion( inputdata_t &inputdata );
 	void InputDisableFloating( inputdata_t &inputdata );
+#ifdef RTSL
+	void InputGGFreeze( inputdata_t &inputdata );
+	void InputGGUnfreeze( inputdata_t &inputdata );
+#endif
 
 	void EnableMotion( void );
 	bool CanBePickedUpByPhyscannon( void );
+#ifdef RTSL
+	bool IsFrozenByPhyscannon();
+	void SetPhyscannonFreezeMotion( bool );
+#endif
 	void OnPhysGunPickup( CBasePlayer *pPhysGunUser, PhysGunPickup_t reason );
 	void OnPhysGunDrop( CBasePlayer *pPhysGunUser, PhysGunDrop_t reason );
 
@@ -408,6 +419,9 @@ private:
 	string_t	m_iszOverrideScript;
 	int			m_damageToEnableMotion;
 	float		m_flForceToEnableMotion;
+#ifdef RTSL
+	bool			m_bFrozenByPhyscannon;
+#endif
 
 	bool		m_bThrownByPlayer;
 	bool		m_bFirstCollisionAfterLaunch;

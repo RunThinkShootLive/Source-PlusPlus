@@ -1,6 +1,6 @@
 //========= Copyright Valve Corporation, All rights reserved. ============//
 //
-// Purpose: 
+// Purpose:
 //
 //=============================================================================//
 
@@ -55,11 +55,14 @@ enum
 //-----------------------------------------------------------------------------
 // Headcrab types
 //-----------------------------------------------------------------------------
-static const char *s_pHeadcrabClass[] = 
+static const char *s_pHeadcrabClass[] =
 {
 	"npc_headcrab",
 	"npc_headcrab_fast",
 	"npc_headcrab_poison",
+#ifdef RTSL
+	"npc_headcrab_mecha"
+#endif
 };
 
 
@@ -282,7 +285,7 @@ void CEnvHeadcrabCanister::Spawn( void )
 			vecForward *= -1.0f;
 
 			trace_t trace;
-			UTIL_TraceLine( GetAbsOrigin(), GetAbsOrigin() + vecForward * 10000, MASK_NPCWORLDSTATIC, 
+			UTIL_TraceLine( GetAbsOrigin(), GetAbsOrigin() + vecForward * 10000, MASK_NPCWORLDSTATIC,
 				this, COLLISION_GROUP_NONE, &trace );
 
 			m_vecImpactPosition = trace.endpos;
@@ -392,7 +395,7 @@ CSkyCamera *CEnvHeadcrabCanister::PlaceCanisterInWorld()
 			GetVectors( &vecForward, NULL, NULL );
 			VectorMultiply( vecForward, -1.0f, vecImpactDirection );
 
-			m_Shared.InitInWorld( gpGlobals->curtime, pLaunchPos->GetAbsOrigin(), GetAbsAngles(), 
+			m_Shared.InitInWorld( gpGlobals->curtime, pLaunchPos->GetAbsOrigin(), GetAbsAngles(),
 				vecImpactDirection, m_vecImpactPosition, true );
 			SetThink( &CEnvHeadcrabCanister::HeadcrabCanisterWorldThink );
 			SetNextThink( gpGlobals->curtime );
@@ -409,7 +412,7 @@ CSkyCamera *CEnvHeadcrabCanister::PlaceCanisterInWorld()
 		GetVectors( &vecForward, NULL, NULL );
 		vecForward *= -1.0f;
 
-		m_Shared.InitInSkybox( gpGlobals->curtime, m_vecImpactPosition, GetAbsAngles(), vecForward, 
+		m_Shared.InitInSkybox( gpGlobals->curtime, m_vecImpactPosition, GetAbsAngles(), vecForward,
 			m_vecImpactPosition, pCamera->m_skyboxData.origin, pCamera->m_skyboxData.scale );
 		AddEFlags( EFL_IN_SKYBOX );
 		SetThink( &CEnvHeadcrabCanister::HeadcrabCanisterSkyboxOnlyThink );
@@ -419,13 +422,13 @@ CSkyCamera *CEnvHeadcrabCanister::PlaceCanisterInWorld()
 	{
 		Vector vecStartPosition, vecDirection;
 		QAngle vecStartAngles;
-		ComputeWorldEntryPoint( &vecStartPosition, &vecStartAngles, &vecDirection ); 
+		ComputeWorldEntryPoint( &vecStartPosition, &vecStartAngles, &vecDirection );
 
 		// Figure out which skybox to place the entity in.
 		pCamera = GetCurrentSkyCamera();
 		if ( pCamera )
 		{
-			m_Shared.InitInSkybox( gpGlobals->curtime, vecStartPosition, vecStartAngles, vecDirection, 
+			m_Shared.InitInSkybox( gpGlobals->curtime, vecStartPosition, vecStartAngles, vecDirection,
 				m_vecImpactPosition, pCamera->m_skyboxData.origin, pCamera->m_skyboxData.scale );
 
 			if ( m_Shared.IsInSkybox() )
@@ -444,7 +447,7 @@ CSkyCamera *CEnvHeadcrabCanister::PlaceCanisterInWorld()
 		}
 		else
 		{
-			m_Shared.InitInWorld( gpGlobals->curtime, vecStartPosition, vecStartAngles, 
+			m_Shared.InitInWorld( gpGlobals->curtime, vecStartPosition, vecStartAngles,
 				vecDirection, m_vecImpactPosition );
 			SetThink( &CEnvHeadcrabCanister::HeadcrabCanisterWorldThink );
 			SetNextThink( gpGlobals->curtime );
@@ -460,7 +463,7 @@ CSkyCamera *CEnvHeadcrabCanister::PlaceCanisterInWorld()
 	return pCamera;
 }
 
-	
+
 //-----------------------------------------------------------------------------
 // Fires the canister!
 //-----------------------------------------------------------------------------
@@ -533,8 +536,8 @@ void CEnvHeadcrabCanister::InputSpawnHeadcrabs( inputdata_t &inputdata )
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
-// Input  : &inputdata - 
+// Purpose:
+// Input  : &inputdata -
 //-----------------------------------------------------------------------------
 void CEnvHeadcrabCanister::InputStopSmoke( inputdata_t &inputdata )
 {
@@ -552,7 +555,7 @@ void CEnvHeadcrabCanister::InputStopSmoke( inputdata_t &inputdata )
 class CCollideList : public IEntityEnumerator
 {
 public:
-	CCollideList( Ray_t *pRay, CBaseEntity* pIgnoreEntity, int nContentsMask ) : 
+	CCollideList( Ray_t *pRay, CBaseEntity* pIgnoreEntity, int nContentsMask ) :
 		m_Entities( 0, 32 ), m_pIgnoreEntity( pIgnoreEntity ),
 		m_nContentsMask( nContentsMask ), m_pRay(pRay) {}
 
@@ -653,18 +656,18 @@ void CEnvHeadcrabCanister::TestForCollisionsAgainstWorld( const Vector &vecEndPo
 
 		// Get distance to object and use it as a scale value.
 		Vector vecSegment;
-		VectorSubtract( pEntity->GetAbsOrigin(), vecEndPosition, vecSegment ); 
+		VectorSubtract( pEntity->GetAbsOrigin(), vecEndPosition, vecSegment );
 		float flDistance = VectorNormalize( vecSegment );
 
 		float flFactor = 1.0f / ( flDamageRadius * (INNER_RADIUS_FRACTION - 1) );
 		flFactor *= flFactor;
 		float flScale = flDistance - flDamageRadius;
 		flScale *= flScale * flFactor;
-		if ( flScale > 1.0f ) 
-		{ 
-			flScale = 1.0f; 
+		if ( flScale > 1.0f )
+		{
+			flScale = 1.0f;
 		}
-		
+
 		// Check for a physics object and apply force!
 		Vector vecForceDir = vecSegment;
 		IPhysicsObject *pPhysObject = pEntity->VPhysicsGetObject();
@@ -688,7 +691,7 @@ void CEnvHeadcrabCanister::TestForCollisionsAgainstWorld( const Vector &vecEndPo
 			if (vecSegment.z < 0.1f)
 			{
 				vecSegment.z = 0.1f;
-				VectorNormalize( vecSegment );					
+				VectorNormalize( vecSegment );
 			}
 			float flAmount = SimpleSplineRemapVal( flScale, 0.0f, 1.0f, 250.0f, 1000.0f );
 			pEntity->ApplyAbsVelocityImpulse( vecSegment * flAmount );
@@ -814,7 +817,7 @@ void CEnvHeadcrabCanister::OpenCanister( void )
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
+// Purpose:
 //-----------------------------------------------------------------------------
 void CEnvHeadcrabCanister::SetLanded( void )
 {
@@ -823,7 +826,7 @@ void CEnvHeadcrabCanister::SetLanded( void )
 	SetMoveType( MOVETYPE_NONE );
 	SetSolid( SOLID_VPHYSICS );
 	VPhysicsInitStatic();
-	
+
 	IncrementInterpolationFrame();
 	m_bLanded = true;
 }
@@ -908,7 +911,7 @@ void CEnvHeadcrabCanister::Detonate( )
 		SetMoveType( MOVETYPE_NONE );
 		IncrementInterpolationFrame();
 		m_bLanded = true;
-		
+
 		// Become invisible so our trail can finish up
 		AddEffects( EF_NODRAW );
 		SetSolidFlags( FSOLID_NOT_SOLID );
@@ -937,12 +940,12 @@ void CEnvHeadcrabCanister::Detonate( )
 	if ( !HasSpawnFlags( SF_NO_IMPACT_EFFECTS ) )
 	{
 		// Normal explosion
-		ExplosionCreate( m_vecImpactPosition, GetAbsAngles(), this, 50.0f, 500.0f, 
+		ExplosionCreate( m_vecImpactPosition, GetAbsAngles(), this, 50.0f, 500.0f,
 			SF_ENVEXPLOSION_NODLIGHTS | SF_ENVEXPLOSION_NOSPARKS | SF_ENVEXPLOSION_NODAMAGE | SF_ENVEXPLOSION_NOSOUND, 1300.0f );
-			
+
 		// Dust explosion
 		AR2Explosion *pExplosion = AR2Explosion::CreateAR2Explosion( m_vecImpactPosition );
-		
+
 		if( pExplosion )
 		{
 			pExplosion->SetLifetime(10);
@@ -987,7 +990,7 @@ void CEnvHeadcrabCanister::HeadcrabCanisterWorldThink( void )
 			Detonate();
 			m_bHasDetonated = true;
 		}
-		
+
 		if ( !HasSpawnFlags( SF_REMOVE_ON_IMPACT ) )
 		{
 			Landed();
@@ -995,7 +998,7 @@ void CEnvHeadcrabCanister::HeadcrabCanisterWorldThink( void )
 
 		return;
 	}
-		   
+
 	// Always move full movement.
 	SetAbsOrigin( vecEndPosition );
 
@@ -1017,7 +1020,7 @@ void CEnvHeadcrabCanister::HeadcrabCanisterWorldThink( void )
 
 
 //-----------------------------------------------------------------------------
-// Purpose: This think function should be called at the time when the HeadcrabCanister 
+// Purpose: This think function should be called at the time when the HeadcrabCanister
 //          will be leaving the skybox and entering the world.
 //-----------------------------------------------------------------------------
 void CEnvHeadcrabCanister::HeadcrabCanisterSkyboxThink( void )
@@ -1056,7 +1059,7 @@ void CEnvHeadcrabCanister::HeadcrabCanisterSkyboxOnlyThink( void )
 	SetAbsAngles( vecEndAngles );
 
 	if ( !HasSpawnFlags( SF_NO_IMPACT_SOUND ) )
-	{	
+	{
 		CPASAttenuationFilter filter( this, ATTN_NONE );
 		EmitSound( filter, entindex(), "HeadcrabCanister.SkyboxExplosion" );
 	}
@@ -1094,9 +1097,9 @@ void CEnvHeadcrabCanister::HeadcrabCanisterSkyboxRestartThink( void )
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
-// Input  : *pInfo - 
-//			bAlways - 
+// Purpose:
+// Input  : *pInfo -
+//			bAlways -
 //-----------------------------------------------------------------------------
 void CEnvHeadcrabCanister::SetTransmit( CCheckTransmitInfo *pInfo, bool bAlways )
 {
@@ -1105,7 +1108,7 @@ void CEnvHeadcrabCanister::SetTransmit( CCheckTransmitInfo *pInfo, bool bAlways 
 		return;
 
 	BaseClass::SetTransmit( pInfo, bAlways );
-	
+
 	// Make our smoke trail always come with us
 	if ( m_hSmokeTrail )
 	{
