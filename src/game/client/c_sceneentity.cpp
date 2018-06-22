@@ -1,6 +1,6 @@
 //========= Copyright Valve Corporation, All rights reserved. ============//
 //
-// Purpose: 
+// Purpose:
 //
 // $NoKeywords: $
 //=============================================================================//
@@ -26,9 +26,9 @@
 //-----------------------------------------------------------------------------
 // Purpose: Decodes animtime and notes when it changes
 // Input  : *pStruct - ( C_BaseEntity * ) used to flag animtime is changine
-//			*pVarData - 
-//			*pIn - 
-//			objectID - 
+//			*pVarData -
+//			*pIn -
+//			objectID -
 //-----------------------------------------------------------------------------
 void RecvProxy_ForcedClientTime( const CRecvProxyData *pData, void *pStruct, void *pOut )
 {
@@ -47,8 +47,8 @@ IMPLEMENT_CLIENTCLASS_DT(C_SceneEntity, DT_SceneEntity, CSceneEntity)
 	RecvPropBool(RECVINFO(m_bPaused)),
 	RecvPropBool(RECVINFO(m_bMultiplayer)),
 	RecvPropFloat(RECVINFO(m_flForceClientTime), 0, RecvProxy_ForcedClientTime ),
-	RecvPropUtlVector( 
-		RECVINFO_UTLVECTOR( m_hActorList ), 
+	RecvPropUtlVector(
+		RECVINFO_UTLVECTOR( m_hActorList ),
 		MAX_ACTORS_IN_SCENE,
 		RecvPropEHandle(NULL, 0, 0)),
 END_RECV_TABLE()
@@ -144,7 +144,7 @@ bool C_SceneEntity::GetHWMorphSceneFileName( const char *pFilename, char *pHWMFi
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
+// Purpose:
 //-----------------------------------------------------------------------------
 void C_SceneEntity::ResetActorFlexesForScene()
 {
@@ -179,7 +179,7 @@ void C_SceneEntity::ResetActorFlexesForScene()
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
+// Purpose:
 //-----------------------------------------------------------------------------
 void C_SceneEntity::StopClientOnlyScene()
 {
@@ -195,7 +195,7 @@ void C_SceneEntity::StopClientOnlyScene()
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
+// Purpose:
 //-----------------------------------------------------------------------------
 void C_SceneEntity::SetupClientOnlyScene( const char *pszFilename, C_BaseFlex *pOwner /* = NULL */, bool bMultiplayer /* = false */ )
 {
@@ -352,7 +352,7 @@ void C_SceneEntity::PostDataUpdate( DataUpdateType_t updateType )
 					types[0] = CChoreoEvent::FLEXANIMATION;
 					types[1] = CChoreoEvent::EXPRESSION;
 					types[2] = CChoreoEvent::GESTURE;
-					types[3] = CChoreoEvent::SEQUENCE;				
+					types[3] = CChoreoEvent::SEQUENCE;
 					types[4] = CChoreoEvent::SPEAK;
 					types[5] = CChoreoEvent::LOOP;
 					m_pScene->RemoveEventsExceptTypes( types, 6 );
@@ -417,7 +417,7 @@ void C_SceneEntity::PreDataUpdate( DataUpdateType_t updateType )
 //-----------------------------------------------------------------------------
 // Purpose: Called every frame that an event is active (Start/EndEvent as also
 //  called)
-// Input  : *event - 
+// Input  : *event -
 // Output : Returns true on success, false on failure.
 //-----------------------------------------------------------------------------
 void C_SceneEntity::ProcessEvent( float currenttime, CChoreoScene *scene, CChoreoEvent *event )
@@ -438,7 +438,7 @@ void C_SceneEntity::ProcessEvent( float currenttime, CChoreoScene *scene, CChore
 			if ( NULL == pActor )
 			{
 				// TODO: QueueProcessEvent
-				// This can occur if we haven't been networked an actor yet... we need to queue it so that we can 
+				// This can occur if we haven't been networked an actor yet... we need to queue it so that we can
 				//  fire off the process event as soon as we have the actor resident on the client.
 				return;
 			}
@@ -480,7 +480,7 @@ void C_SceneEntity::ProcessEvent( float currenttime, CChoreoScene *scene, CChore
 
 //-----------------------------------------------------------------------------
 // Purpose: Called for events that are part of a pause condition
-// Input  : *event - 
+// Input  : *event -
 // Output : Returns true on event completed, false on non-completion.
 //-----------------------------------------------------------------------------
 bool C_SceneEntity::CheckEvent( float currenttime, CChoreoScene *scene, CChoreoEvent *event )
@@ -507,8 +507,8 @@ C_BaseFlex *C_SceneEntity::FindNamedActor( CChoreoActor *pChoreoActor )
 
 //-----------------------------------------------------------------------------
 // Purpose: All events are leading edge triggered
-// Input  : currenttime - 
-//			*event - 
+// Input  : currenttime -
+//			*event -
 //-----------------------------------------------------------------------------
 void C_SceneEntity::StartEvent( float currenttime, CChoreoScene *scene, CChoreoEvent *event )
 {
@@ -519,7 +519,7 @@ void C_SceneEntity::StartEvent( float currenttime, CChoreoScene *scene, CChoreoE
  		Scene_Printf( "%s : %8.2f:  ignored %s\n", GetSceneFileName(), currenttime, event->GetDescription() );
  		return;
  	}
- 
+
 
 	C_BaseFlex *pActor = NULL;
 	CChoreoActor *actor = event->GetActor();
@@ -528,7 +528,7 @@ void C_SceneEntity::StartEvent( float currenttime, CChoreoScene *scene, CChoreoE
 		pActor = FindNamedActor( actor );
 		if ( NULL == pActor )
 		{
-			// This can occur if we haven't been networked an actor yet... we need to queue it so that we can 
+			// This can occur if we haven't been networked an actor yet... we need to queue it so that we can
 			//  fire off the start event as soon as we have the actor resident on the client.
 			QueueStartEvent( currenttime, scene, event );
 			return;
@@ -617,9 +617,9 @@ void C_SceneEntity::StartEvent( float currenttime, CChoreoScene *scene, CChoreoE
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
-// Input  : *scene - 
-//			*event - 
+// Purpose:
+// Input  : *scene -
+//			*event -
 //-----------------------------------------------------------------------------
 void C_SceneEntity::DispatchProcessLoop( CChoreoScene *scene, CChoreoEvent *event )
 {
@@ -651,8 +651,8 @@ void C_SceneEntity::DispatchProcessLoop( CChoreoScene *scene, CChoreoEvent *even
 
 //-----------------------------------------------------------------------------
 // Purpose: Playback sound file that contains phonemes
-// Input  : *actor - 
-//			*parameters - 
+// Input  : *actor -
+//			*parameters -
 //-----------------------------------------------------------------------------
 void C_SceneEntity::DispatchStartSpeak( CChoreoScene *scene, C_BaseFlex *actor, CChoreoEvent *event, soundlevel_t iSoundlevel )
 {
@@ -720,9 +720,9 @@ void C_SceneEntity::DispatchEndSpeak( CChoreoScene *scene, C_BaseFlex *actor, CC
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
-// Input  : currenttime - 
-//			*event - 
+// Purpose:
+// Input  : currenttime -
+//			*event -
 //-----------------------------------------------------------------------------
 void C_SceneEntity::EndEvent( float currenttime, CChoreoScene *scene, CChoreoEvent *event )
 {
@@ -800,60 +800,67 @@ bool CChoreoStringPool::GetString( short stringId, char *buff, int buffSize )
 	}
 	V_strncpy( buff, pString, buffSize );
 	return true;
-} 	
+}
 
 CChoreoStringPool g_ChoreoStringPool;
 
 CChoreoScene *C_SceneEntity::LoadScene( const char *filename )
 {
-	char loadfile[ 512 ];
+	char loadfile[MAX_PATH];
 	Q_strncpy( loadfile, filename, sizeof( loadfile ) );
 	Q_SetExtension( loadfile, ".vcd", sizeof( loadfile ) );
 	Q_FixSlashes( loadfile );
 
-	char *pBuffer = NULL;
-	size_t bufsize = scenefilecache->GetSceneBufferSize( loadfile );
-	if ( bufsize <= 0 )
-		return NULL;
+	void *pBuffer = 0;
+	CChoreoScene *pScene = NULL;
 
-	pBuffer = new char[ bufsize ];
-	if ( !scenefilecache->GetSceneData( filename, (byte *)pBuffer, bufsize ) )
+	int fileSize = filesystem->ReadFileEx( loadfile, "MOD", &pBuffer, true );
+	if ( fileSize )
 	{
-		delete[] pBuffer;
-		return NULL;
-	}
-
-	CChoreoScene *pScene;
-	if ( IsBufferBinaryVCD( pBuffer, bufsize ) )
-	{
-		pScene = new CChoreoScene( this );
-		CUtlBuffer buf( pBuffer, bufsize, CUtlBuffer::READ_ONLY );
-		if ( !pScene->RestoreFromBinaryBuffer( buf, loadfile, &g_ChoreoStringPool ) )
-		{
-			Warning( "Unable to restore binary scene '%s'\n", loadfile );
-			delete pScene;
-			pScene = NULL;
-		}
-		else
-		{
-			pScene->SetPrintFunc( Scene_Printf );
-			pScene->SetEventCallbackInterface( this );
-		}
+		g_TokenProcessor.SetBuffer( ( char* )pBuffer );
+		pScene = ChoreoLoadScene( loadfile, this, &g_TokenProcessor, Scene_Printf );
 	}
 	else
 	{
-		g_TokenProcessor.SetBuffer( pBuffer );
-		pScene = ChoreoLoadScene( loadfile, this, &g_TokenProcessor, Scene_Printf );
+		fileSize = scenefilecache->GetSceneBufferSize( loadfile );
+		if ( fileSize <= 0 )
+			return NULL;
+
+		pBuffer = new char[fileSize];
+		if ( !scenefilecache->GetSceneData( filename, ( byte * )pBuffer, fileSize ) )
+		{
+			delete[] (byte*)pBuffer;
+			return NULL;
+		}
+
+
+		if ( IsBufferBinaryVCD( ( char* )pBuffer, fileSize ) )
+		{
+			pScene = new CChoreoScene( this );
+			CUtlBuffer buf( pBuffer, fileSize, CUtlBuffer::READ_ONLY );
+			if ( !pScene->RestoreFromBinaryBuffer( buf, loadfile, &g_ChoreoStringPool ) )
+			{
+				Warning( "Unable to restore scene '%s'\n", loadfile );
+				delete pScene;
+				pScene = NULL;
+			}
+		}
 	}
 
-	delete[] pBuffer;
+	if ( pScene )
+	{
+		pScene->SetPrintFunc( Scene_Printf );
+		pScene->SetEventCallbackInterface( this );
+	}
+
+	delete[] (byte*)pBuffer;
 	return pScene;
 }
 
 
 //-----------------------------------------------------------------------------
-// Purpose: 
-// Input  : *filename - 
+// Purpose:
+// Input  : *filename -
 //-----------------------------------------------------------------------------
 void C_SceneEntity::LoadSceneFromFile( const char *filename )
 {
@@ -883,7 +890,7 @@ void C_SceneEntity::ClearSceneEvents( CChoreoScene *scene, bool canceled )
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
+// Purpose:
 //-----------------------------------------------------------------------------
 void C_SceneEntity::UnloadScene( void )
 {
@@ -898,7 +905,7 @@ void C_SceneEntity::UnloadScene( void )
 
 			if ( !pTestActor )
 				continue;
-		
+
 			pTestActor->RemoveChoreoScene( m_pScene );
 		}
 	}
@@ -907,9 +914,9 @@ void C_SceneEntity::UnloadScene( void )
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
-// Input  : *actor - 
-//			*event - 
+// Purpose:
+// Input  : *actor -
+//			*event -
 //-----------------------------------------------------------------------------
 void C_SceneEntity::DispatchStartFlexAnimation( CChoreoScene *scene, C_BaseFlex *actor, CChoreoEvent *event )
 {
@@ -917,9 +924,9 @@ void C_SceneEntity::DispatchStartFlexAnimation( CChoreoScene *scene, C_BaseFlex 
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
-// Input  : *actor - 
-//			*event - 
+// Purpose:
+// Input  : *actor -
+//			*event -
 //-----------------------------------------------------------------------------
 void C_SceneEntity::DispatchEndFlexAnimation( CChoreoScene *scene, C_BaseFlex *actor, CChoreoEvent *event )
 {
@@ -927,9 +934,9 @@ void C_SceneEntity::DispatchEndFlexAnimation( CChoreoScene *scene, C_BaseFlex *a
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
-// Input  : *actor - 
-//			*event - 
+// Purpose:
+// Input  : *actor -
+//			*event -
 //-----------------------------------------------------------------------------
 void C_SceneEntity::DispatchStartExpression( CChoreoScene *scene, C_BaseFlex *actor, CChoreoEvent *event )
 {
@@ -937,9 +944,9 @@ void C_SceneEntity::DispatchStartExpression( CChoreoScene *scene, C_BaseFlex *ac
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
-// Input  : *actor - 
-//			*event - 
+// Purpose:
+// Input  : *actor -
+//			*event -
 //-----------------------------------------------------------------------------
 void C_SceneEntity::DispatchEndExpression( CChoreoScene *scene, C_BaseFlex *actor, CChoreoEvent *event )
 {
@@ -947,9 +954,9 @@ void C_SceneEntity::DispatchEndExpression( CChoreoScene *scene, C_BaseFlex *acto
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
-// Input  : *actor - 
-//			*parameters - 
+// Purpose:
+// Input  : *actor -
+//			*parameters -
 //-----------------------------------------------------------------------------
 void C_SceneEntity::DispatchStartGesture( CChoreoScene *scene, C_BaseFlex *actor, CChoreoEvent *event )
 {
@@ -957,13 +964,13 @@ void C_SceneEntity::DispatchStartGesture( CChoreoScene *scene, C_BaseFlex *actor
 	if ( !Q_stricmp( event->GetName(), "NULL" ) )
 		return;
 
-	actor->AddSceneEvent( scene, event, NULL, IsClientOnly() ); 
+	actor->AddSceneEvent( scene, event, NULL, IsClientOnly() );
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
-// Input  : *actor - 
-//			*parameters - 
+// Purpose:
+// Input  : *actor -
+//			*parameters -
 //-----------------------------------------------------------------------------
 void C_SceneEntity::DispatchProcessGesture( CChoreoScene *scene, C_BaseFlex *actor, CChoreoEvent *event )
 {
@@ -972,13 +979,13 @@ void C_SceneEntity::DispatchProcessGesture( CChoreoScene *scene, C_BaseFlex *act
 		return;
 
 	actor->RemoveSceneEvent( scene, event, false );
-	actor->AddSceneEvent( scene, event, NULL, IsClientOnly() ); 
+	actor->AddSceneEvent( scene, event, NULL, IsClientOnly() );
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
-// Input  : *actor - 
-//			*parameters - 
+// Purpose:
+// Input  : *actor -
+//			*parameters -
 //-----------------------------------------------------------------------------
 void C_SceneEntity::DispatchEndGesture( CChoreoScene *scene, C_BaseFlex *actor, CChoreoEvent *event )
 {
@@ -990,8 +997,8 @@ void C_SceneEntity::DispatchEndGesture( CChoreoScene *scene, C_BaseFlex *actor, 
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
-// Input  : *actor - 
+// Purpose:
+// Input  : *actor -
 //-----------------------------------------------------------------------------
 void C_SceneEntity::DispatchStartSequence( CChoreoScene *scene, CBaseFlex *actor, CChoreoEvent *event )
 {
@@ -999,8 +1006,8 @@ void C_SceneEntity::DispatchStartSequence( CChoreoScene *scene, CBaseFlex *actor
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
-// Input  : *actor - 
+// Purpose:
+// Input  : *actor -
 //-----------------------------------------------------------------------------
 void C_SceneEntity::DispatchProcessSequence( CChoreoScene *scene, CBaseFlex *actor, CChoreoEvent *event )
 {
@@ -1009,8 +1016,8 @@ void C_SceneEntity::DispatchProcessSequence( CChoreoScene *scene, CBaseFlex *act
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
-// Input  : *actor - 
+// Purpose:
+// Input  : *actor -
 //-----------------------------------------------------------------------------
 void C_SceneEntity::DispatchEndSequence( CChoreoScene *scene, CBaseFlex *actor, CChoreoEvent *event )
 {
@@ -1018,7 +1025,7 @@ void C_SceneEntity::DispatchEndSequence( CChoreoScene *scene, CBaseFlex *actor, 
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
+// Purpose:
 //-----------------------------------------------------------------------------
 void C_SceneEntity::DoThink( float frametime )
 {
@@ -1062,7 +1069,7 @@ void C_SceneEntity::CheckQueuedEvents()
 	for ( int i = 0; i < c; ++i )
 	{
 		const QueuedEvents_t& check = events[ i ];
-		
+
 		// Retry starting this event
 		StartEvent( check.starttime, check.scene, check.event );
 	}
@@ -1080,7 +1087,7 @@ void C_SceneEntity::QueueStartEvent( float starttime, CChoreoScene *scene, CChor
 	for ( int i = 0; i < c; ++i )
 	{
 		const QueuedEvents_t& check = m_QueuedEvents[ i ];
-		if ( check.scene == scene && 
+		if ( check.scene == scene &&
 			 check.event == event )
 			return;
 	}
@@ -1094,7 +1101,7 @@ void C_SceneEntity::QueueStartEvent( float starttime, CChoreoScene *scene, CChor
 
 //-----------------------------------------------------------------------------
 // Purpose: Resets time such that the client version of the .vcd is also updated, if appropriate
-// Input  : t - 
+// Input  : t -
 //			forceClientSync - unused for now, we may want to reenable this at some point
 //-----------------------------------------------------------------------------
 void C_SceneEntity::SetCurrentTime( float t, bool forceClientSync )
