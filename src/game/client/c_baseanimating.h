@@ -605,6 +605,7 @@ private:
 #ifdef GLOWS_ENABLE
 	bool				m_bClientSideGlowEnabled;	// client-side only value used for spectator
 	bool				m_bGlowEnabled;				// networked value
+	CNetworkColor32( m_clrRender );
 	bool				m_bOldGlowEnabled;
 	CGlowObject			*m_pGlowEffect;
 #endif // GLOWS_ENABLE

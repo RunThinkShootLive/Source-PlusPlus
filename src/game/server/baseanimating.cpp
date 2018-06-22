@@ -263,6 +263,7 @@ IMPLEMENT_SERVERCLASS_ST(CBaseAnimating, DT_BaseAnimating)
 
 #ifdef GLOWS_ENABLE
 	SendPropBool( SENDINFO( m_bGlowEnabled ) ),
+	SendPropInt( SENDINFO( m_clrRender ), 32, SPROP_UNSIGNED ),
 #endif // GLOWS_ENABLE
 
 END_SEND_TABLE()
@@ -295,6 +296,7 @@ CBaseAnimating::CBaseAnimating()
 
 #ifdef GLOWS_ENABLE
 	m_bGlowEnabled.Set( false );
+	m_clrRender.Init( 194, 194, 194 );
 #endif // GLOWS_ENABLE
 }
 
@@ -351,6 +353,16 @@ void CBaseAnimating::RemoveGlowEffect( void )
 bool CBaseAnimating::IsGlowEffectActive( void )
 {
 	return m_bGlowEnabled;
+}
+
+void CBaseAnimating::SetGlow( bool state, const Color& glowColor )
+{
+	if ( state && !m_bGlowEnabled )
+		AddGlowEffect();
+	else if ( !state && m_bGlowEnabled )
+		RemoveGlowEffect();
+	if ( state )
+		m_glowColor.Init( glowColor.r(), glowColor.g(), glowColor.b() );
 }
 #endif
 

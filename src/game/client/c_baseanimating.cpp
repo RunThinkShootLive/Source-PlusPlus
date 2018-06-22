@@ -208,6 +208,7 @@ IMPLEMENT_CLIENTCLASS_DT(C_BaseAnimating, DT_BaseAnimating, CBaseAnimating)
 
 #ifdef GLOWS_ENABLE
 	RecvPropBool( RECVINFO( m_bGlowEnabled ) ),
+	RecvPropInt( RECVINFO( m_clrRender ) ),
 #endif // GLOWS_ENABLE
 
 END_RECV_TABLE()
@@ -752,6 +753,7 @@ C_BaseAnimating::C_BaseAnimating() :
 	m_bGlowEnabled = false;
 	m_bOldGlowEnabled = false;
 	m_bClientSideGlowEnabled = false;
+	m_clrRender.Init( 194, 194, 194 );
 #endif // GLOWS_ENABLE
 }
 
@@ -6576,9 +6578,9 @@ void C_BaseAnimating::MoveBoneAttachments( C_BaseAnimating* attachTarget )
 //-----------------------------------------------------------------------------
 void C_BaseAnimating::GetGlowEffectColor( float *r, float *g, float *b )
 {
-	*r = 0.76f;
-	*g = 0.76f;
-	*b = 0.76f;
+	*r = m_clrRender.GetR() / 255.f;
+	*g = m_clrRender.GetG() / 255.f;
+	*b = m_clrRender.GetB() / 255.f;
 }
 
 //-----------------------------------------------------------------------------

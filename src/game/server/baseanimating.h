@@ -354,6 +354,8 @@ public:
 	void				AddGlowEffect( void );
 	void				RemoveGlowEffect( void );
 	bool				IsGlowEffectActive( void );
+
+	void				SetGlow( bool state, const Color& glowColor = Color( 255, 255, 255 ) );
 #endif // GLOWS_ENABLE
 
 private:
@@ -440,6 +442,7 @@ protected:
 
 #ifdef GLOWS_ENABLE
 	CNetworkVar( bool, m_bGlowEnabled );
+	CNetworkColor32( m_glowColor );
 #endif // GLOWS_ENABLE
 
 public:
