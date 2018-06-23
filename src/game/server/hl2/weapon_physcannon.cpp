@@ -1716,6 +1716,7 @@ void CWeaponPhysCannon::SetViewModel( void )
 	else
 		vm->SetWeaponModel( MEGACANNON_MODEL, this );
 
+#ifdef RTSL
 	if ( m_bPhyscannonFreezeModuleState )
 	{
 		vm->SetBodygroup( FREEZEMODULE_BODYGROUP, FREEZEMODULE_INDEX );
@@ -1724,6 +1725,7 @@ void CWeaponPhysCannon::SetViewModel( void )
 	{
 		vm->SetBodygroup( FREEZEMODULE_BODYGROUP, 0 );
 	}
+#endif
 }
 
 //-----------------------------------------------------------------------------

@@ -42,6 +42,7 @@
 #endif
 #ifdef GLOWS_ENABLE
 #include "glow_outline_effect.h"
+#include "clienteffectprecachesystem.h"
 #endif
 
 #if defined( REPLAY_ENABLED )
@@ -184,6 +185,13 @@ CON_COMMAND_F( crash, "Crash the client. Optional parameter -- type of crash:\n 
 	}
 }
 #endif // _DEBUG
+
+#ifdef GLOWS_ENABLE
+CLIENTEFFECT_REGISTER_BEGIN( PrecachePostProcessingEffectsGlow )
+	CLIENTEFFECT_MATERIAL( "dev/glow_color" )
+	CLIENTEFFECT_MATERIAL( "dev/halo_add_to_screen" )
+CLIENTEFFECT_REGISTER_END()
+#endif
 
 static void __MsgFunc_Rumble( bf_read &msg )
 {

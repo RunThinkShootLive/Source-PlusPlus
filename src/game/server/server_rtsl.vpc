@@ -278,6 +278,7 @@ $Project "Server (RTSL)"
 			$File	"hl2\func_bulletshield.cpp"
 			$File	"hl2\func_bulletshield.h"
 			$File	"episodic\npc_puppet.cpp"
+			$File	"item_physcannon_freeze.cpp"
 
 
 			$Folder	"unused"
