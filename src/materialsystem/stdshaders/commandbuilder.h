@@ -1,6 +1,6 @@
 //========= Copyright Valve Corporation, All rights reserved. ============//
 //
-// Purpose: 
+// Purpose:
 //
 // $NoKeywords: $
 // Utility class for building command buffers into memory
@@ -31,7 +31,7 @@ public:
 #ifdef DBGFLAG_ASSERT
 	size_t m_nNumBytesRemaining;
 #endif
-	
+
 	FORCEINLINE CFixedCommandStorageBuffer( void )
 	{
 		m_pDataOut = m_Data;
@@ -265,7 +265,7 @@ public:
 			transformation[0].Init( 1.0f, 0.0f, 0.0f, 0.0f );
 			transformation[1].Init( 0.0f, 1.0f, 0.0f, 0.0f );
 		}
-		SetVertexShaderConstant( vertexReg, transformation[0].Base(), 2 ); 
+		SetVertexShaderConstant( vertexReg, transformation[0].Base(), 2 );
 	}
 
 
@@ -302,7 +302,7 @@ public:
 		transformation[1][1] *= scale[1];
 		transformation[0][3] *= scale[0];
 		transformation[1][3] *= scale[1];
-		SetVertexShaderConstant( vertexReg, transformation[0].Base(), 2 ); 
+		SetVertexShaderConstant( vertexReg, transformation[0].Base(), 2 );
 	}
 
 	FORCEINLINE void SetEnvMapTintPixelShaderDynamicState( int pixelReg, int tintVar )
@@ -368,6 +368,11 @@ public:
 		m_Storage.PutInt( nTextureId );
 	}
 
+	FORCEINLINE void BindTexture( CBaseVSShader *pShader, Sampler_t nSampler, ITexture *pTexture, int nFrame )
+	{
+		ShaderAPITextureHandle_t hTexture = pShader->GetShaderAPITextureBindHandle( pTexture, nFrame );
+		BindTexture( nSampler, hTexture );
+	}
 
 	FORCEINLINE void BindTexture( Sampler_t nSampler, ShaderAPITextureHandle_t hTexture )
 	{
@@ -380,13 +385,13 @@ public:
 		}
 	}
 
-	FORCEINLINE void BindTexture( CBaseVSShader *pShader, Sampler_t nSampler, int nTextureVar, int nFrameVar = -1 )
+	FORCEINLINE void BindTexture( CBaseShader *pShader, Sampler_t nSampler, int nTextureVar, int nFrameVar = -1 )
 	{
 		ShaderAPITextureHandle_t hTexture = pShader->GetShaderAPITextureBindHandle( nTextureVar, nFrameVar );
 		BindTexture( nSampler, hTexture );
 	}
 
-	FORCEINLINE void BindMultiTexture( CBaseVSShader *pShader, Sampler_t nSampler1, Sampler_t nSampler2, int nTextureVar, int nFrameVar )
+	FORCEINLINE void BindMultiTexture( CBaseShader *pShader, Sampler_t nSampler1, Sampler_t nSampler2, int nTextureVar, int nFrameVar )
 	{
 		ShaderAPITextureHandle_t hTexture = pShader->GetShaderAPITextureBindHandle( nTextureVar, nFrameVar, 0 );
 		BindTexture( nSampler1, hTexture );

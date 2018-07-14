@@ -1,10 +1,11 @@
 //========= Copyright Valve Corporation, All rights reserved. ============//
 //
-// Purpose: 
+// Purpose:
 //
 // $NoKeywords: $
 // This is what all vs/ps (dx8+) shaders inherit from.
 //===========================================================================//
+
 #if !defined(_STATIC_LINKED) || defined(STDSHADER_DX8_DLL_EXPORT) || defined(STDSHADER_DX9_DLL_EXPORT)
 
 #include "BaseVSShader.h"
@@ -44,18 +45,20 @@
 #include "SDK_lightmappedgeneric_bumpmappedlightmap.inc"
 #endif
 
+#include "utldict.h"
+
+#include "../IShaderSystem.h"
+#include "shaderapi/ishaderapi.h"
 #include "IShaderExtension.h"
 #include "bitvec.h"
+
+//#define SUBHOOK_STATIC
+//#include "../thirdparty/subhook/subhook.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
 ConVar mat_fullbright( "mat_fullbright","0", FCVAR_CHEAT );
-
-CON_COMMAND(game_shader_loaded, "Shows that game shader loaded.")
-{
-
-}
 
 // These functions are to be called from the shaders.
 
@@ -84,7 +87,7 @@ void CBaseVSShader::SetPixelShaderConstant( int pixelReg, int constantVar, int c
 	}
 
 	val[3] = pPixelVar2->GetFloatValue();
-	s_pShaderAPI->SetPixelShaderConstant( pixelReg, val );	
+	s_pShaderAPI->SetPixelShaderConstant( pixelReg, val );
 }
 
 void CBaseVSShader::SetPixelShaderConstantGammaToLinear( int pixelReg, int constantVar, int constantVar2 )
@@ -113,7 +116,7 @@ void CBaseVSShader::SetPixelShaderConstantGammaToLinear( int pixelReg, int const
 	val[1] = val[1] > 1.0f ? val[1] : GammaToLinear( val[1] );
 	val[2] = val[2] > 1.0f ? val[2] : GammaToLinear( val[2] );
 
-	s_pShaderAPI->SetPixelShaderConstant( pixelReg, val );	
+	s_pShaderAPI->SetPixelShaderConstant( pixelReg, val );
 }
 
 void CBaseVSShader::SetPixelShaderConstant_W( int pixelReg, int constantVar, float fWValue )
@@ -131,7 +134,7 @@ void CBaseVSShader::SetPixelShaderConstant_W( int pixelReg, int constantVar, flo
 	else
 		val[0] = val[1] = val[2] = val[3] = pPixelVar->GetFloatValue();
 	val[3]=fWValue;
-	s_pShaderAPI->SetPixelShaderConstant( pixelReg, val );	
+	s_pShaderAPI->SetPixelShaderConstant( pixelReg, val );
 }
 
 void CBaseVSShader::SetPixelShaderConstant( int pixelReg, int constantVar )
@@ -148,7 +151,7 @@ void CBaseVSShader::SetPixelShaderConstant( int pixelReg, int constantVar )
 		pPixelVar->GetVecValue( val, 4 );
 	else
 		val[0] = val[1] = val[2] = val[3] = pPixelVar->GetFloatValue();
-	s_pShaderAPI->SetPixelShaderConstant( pixelReg, val );	
+	s_pShaderAPI->SetPixelShaderConstant( pixelReg, val );
 }
 
 void CBaseVSShader::SetPixelShaderConstantGammaToLinear( int pixelReg, int constantVar )
@@ -170,7 +173,7 @@ void CBaseVSShader::SetPixelShaderConstantGammaToLinear( int pixelReg, int const
 	val[1] = val[1] > 1.0f ? val[1] : GammaToLinear( val[1] );
 	val[2] = val[2] > 1.0f ? val[2] : GammaToLinear( val[2] );
 
-	s_pShaderAPI->SetPixelShaderConstant( pixelReg, val );	
+	s_pShaderAPI->SetPixelShaderConstant( pixelReg, val );
 }
 
 void CBaseVSShader::SetVertexShaderConstantGammaToLinear( int var, float const* pVec, int numConst, bool bForce )
@@ -225,7 +228,7 @@ void CBaseVSShader::SetPixelShaderConstantFudge( int pixelReg, int constantVar )
 	}
 	else
 		val[0] = val[1] = val[2] = val[3] = pPixelVar->GetFloatValue() * 0.992f + 0.0078f;
-	s_pShaderAPI->SetPixelShaderConstant( pixelReg, val );	
+	s_pShaderAPI->SetPixelShaderConstant( pixelReg, val );
 }
 
 void CBaseVSShader::SetVertexShaderConstant( int vertexReg, int constantVar )
@@ -242,7 +245,7 @@ void CBaseVSShader::SetVertexShaderConstant( int vertexReg, int constantVar )
 		pVertexVar->GetVecValue( val, 4 );
 	else
 		val[0] = val[1] = val[2] = val[3] = pVertexVar->GetFloatValue();
-	s_pShaderAPI->SetVertexShaderConstant( vertexReg, val );	
+	s_pShaderAPI->SetVertexShaderConstant( vertexReg, val );
 }
 
 //-----------------------------------------------------------------------------
@@ -290,7 +293,7 @@ void CBaseVSShader::SetVertexShaderTextureTranslation( int vertexReg, int transl
 	Vector4D translation[2];
 	translation[0].Init( 1.0f, 0.0f, 0.0f, offset[0] );
 	translation[1].Init( 0.0f, 1.0f, 0.0f, offset[1] );
-	s_pShaderAPI->SetVertexShaderConstant( vertexReg, translation[0].Base(), 2 ); 
+	s_pShaderAPI->SetVertexShaderConstant( vertexReg, translation[0].Base(), 2 );
 }
 
 void CBaseVSShader::SetVertexShaderTextureScale( int vertexReg, int scaleVar )
@@ -309,7 +312,7 @@ void CBaseVSShader::SetVertexShaderTextureScale( int vertexReg, int scaleVar )
 	Vector4D scaleMatrix[2];
 	scaleMatrix[0].Init( scale[0], 0.0f, 0.0f, 0.0f );
 	scaleMatrix[1].Init( 0.0f, scale[1], 0.0f, 0.0f );
-	s_pShaderAPI->SetVertexShaderConstant( vertexReg, scaleMatrix[0].Base(), 2 ); 
+	s_pShaderAPI->SetVertexShaderConstant( vertexReg, scaleMatrix[0].Base(), 2 );
 }
 
 void CBaseVSShader::SetVertexShaderTextureTransform( int vertexReg, int transformVar )
@@ -327,7 +330,7 @@ void CBaseVSShader::SetVertexShaderTextureTransform( int vertexReg, int transfor
 		transformation[0].Init( 1.0f, 0.0f, 0.0f, 0.0f );
 		transformation[1].Init( 0.0f, 1.0f, 0.0f, 0.0f );
 	}
-	s_pShaderAPI->SetVertexShaderConstant( vertexReg, transformation[0].Base(), 2 ); 
+	s_pShaderAPI->SetVertexShaderConstant( vertexReg, transformation[0].Base(), 2 );
 }
 
 void CBaseVSShader::SetVertexShaderTextureScaledTransform( int vertexReg, int transformVar, int scaleVar )
@@ -363,7 +366,7 @@ void CBaseVSShader::SetVertexShaderTextureScaledTransform( int vertexReg, int tr
 	transformation[1][1] *= scale[1];
 	transformation[0][3] *= scale[0];
 	transformation[1][3] *= scale[1];
-	s_pShaderAPI->SetVertexShaderConstant( vertexReg, transformation[0].Base(), 2 ); 
+	s_pShaderAPI->SetVertexShaderConstant( vertexReg, transformation[0].Base(), 2 );
 }
 
 
@@ -386,7 +389,7 @@ void CBaseVSShader::SetPixelShaderTextureTranslation( int pixelReg, int translat
 	Vector4D translation[2];
 	translation[0].Init( 1.0f, 0.0f, 0.0f, offset[0] );
 	translation[1].Init( 0.0f, 1.0f, 0.0f, offset[1] );
-	s_pShaderAPI->SetPixelShaderConstant( pixelReg, translation[0].Base(), 2 ); 
+	s_pShaderAPI->SetPixelShaderConstant( pixelReg, translation[0].Base(), 2 );
 }
 
 void CBaseVSShader::SetPixelShaderTextureScale( int pixelReg, int scaleVar )
@@ -405,7 +408,7 @@ void CBaseVSShader::SetPixelShaderTextureScale( int pixelReg, int scaleVar )
 	Vector4D scaleMatrix[2];
 	scaleMatrix[0].Init( scale[0], 0.0f, 0.0f, 0.0f );
 	scaleMatrix[1].Init( 0.0f, scale[1], 0.0f, 0.0f );
-	s_pShaderAPI->SetPixelShaderConstant( pixelReg, scaleMatrix[0].Base(), 2 ); 
+	s_pShaderAPI->SetPixelShaderConstant( pixelReg, scaleMatrix[0].Base(), 2 );
 }
 
 void CBaseVSShader::SetPixelShaderTextureTransform( int pixelReg, int transformVar )
@@ -423,7 +426,7 @@ void CBaseVSShader::SetPixelShaderTextureTransform( int pixelReg, int transformV
 		transformation[0].Init( 1.0f, 0.0f, 0.0f, 0.0f );
 		transformation[1].Init( 0.0f, 1.0f, 0.0f, 0.0f );
 	}
-	s_pShaderAPI->SetPixelShaderConstant( pixelReg, transformation[0].Base(), 2 ); 
+	s_pShaderAPI->SetPixelShaderConstant( pixelReg, transformation[0].Base(), 2 );
 }
 
 void CBaseVSShader::SetPixelShaderTextureScaledTransform( int pixelReg, int transformVar, int scaleVar )
@@ -459,12 +462,12 @@ void CBaseVSShader::SetPixelShaderTextureScaledTransform( int pixelReg, int tran
 	transformation[1][1] *= scale[1];
 	transformation[0][3] *= scale[0];
 	transformation[1][3] *= scale[1];
-	s_pShaderAPI->SetPixelShaderConstant( pixelReg, transformation[0].Base(), 2 ); 
+	s_pShaderAPI->SetPixelShaderConstant( pixelReg, transformation[0].Base(), 2 );
 }
 
 
 //-----------------------------------------------------------------------------
-// Moves a matrix into vertex shader constants 
+// Moves a matrix into vertex shader constants
 //-----------------------------------------------------------------------------
 void CBaseVSShader::SetVertexShaderMatrix2x4( int vertexReg, int matrixVar )
 {
@@ -486,13 +489,13 @@ void CBaseVSShader::SetVertexShaderMatrix3x4( int vertexReg, int matrixVar )
 	IMaterialVar* pTranslationVar = s_ppParams[matrixVar];
 	if (pTranslationVar)
 	{
-		s_pShaderAPI->SetVertexShaderConstant( vertexReg, &pTranslationVar->GetMatrixValue( )[0][0], 3 ); 
+		s_pShaderAPI->SetVertexShaderConstant( vertexReg, &pTranslationVar->GetMatrixValue( )[0][0], 3 );
 	}
 	else
 	{
 		VMatrix matrix;
 		MatrixSetIdentity( matrix );
-		s_pShaderAPI->SetVertexShaderConstant( vertexReg, &matrix[0][0], 3 ); 
+		s_pShaderAPI->SetVertexShaderConstant( vertexReg, &matrix[0][0], 3 );
 	}
 }
 
@@ -501,13 +504,13 @@ void CBaseVSShader::SetVertexShaderMatrix4x4( int vertexReg, int matrixVar )
 	IMaterialVar* pTranslationVar = s_ppParams[matrixVar];
 	if (pTranslationVar)
 	{
-		s_pShaderAPI->SetVertexShaderConstant( vertexReg, &pTranslationVar->GetMatrixValue( )[0][0], 4 ); 
+		s_pShaderAPI->SetVertexShaderConstant( vertexReg, &pTranslationVar->GetMatrixValue( )[0][0], 4 );
 	}
 	else
 	{
 		VMatrix matrix;
 		MatrixSetIdentity( matrix );
-		s_pShaderAPI->SetVertexShaderConstant( vertexReg, &matrix[0][0], 4 ); 
+		s_pShaderAPI->SetVertexShaderConstant( vertexReg, &matrix[0][0], 4 );
 	}
 }
 
@@ -562,16 +565,16 @@ void CBaseVSShader::LoadViewportTransformScaledIntoVertexShaderConstant( int ver
 
 	s_pShaderAPI->GetViewports( &viewport, 1 );
 
-	int bbWidth = 0, 
+	int bbWidth = 0,
 		bbHeight = 0;
 
 	s_pShaderAPI->GetBackBufferDimensions( bbWidth, bbHeight );
 
 	// (x, y, z, w) = (Width / bbWidth, Height / bbHeight, MinX / bbWidth, MinY / bbHeight)
-	Vector4D viewportTransform( 
+	Vector4D viewportTransform(
 		1.0f * viewport.m_nWidth / bbWidth,
 		1.0f * viewport.m_nHeight / bbHeight,
-		1.0f * viewport.m_nTopLeftX / bbWidth, 
+		1.0f * viewport.m_nTopLeftX / bbWidth,
 		1.0f * viewport.m_nTopLeftY / bbHeight
 	);
 
@@ -685,7 +688,7 @@ void CBaseVSShader::SetModulationPixelShaderDynamicState_LinearColorSpace_Linear
 //-----------------------------------------------------------------------------
 void CBaseVSShader::ColorVarsToVector( int colorVar, int alphaVar, Vector4D &color )
 {
-	color.Init( 1.0, 1.0, 1.0, 1.0 ); 
+	color.Init( 1.0, 1.0, 1.0, 1.0 );
 	if ( colorVar != -1 )
 	{
 		IMaterialVar* pColorVar = s_ppParams[colorVar];
@@ -808,7 +811,7 @@ const char *CBaseVSShader::UnlitGeneric_ComputePixelShaderName( bool bMask,
 																bool bDetailMultiplyMode,
 																bool bMaskBaseByDetailAlpha )
 {
-	static char const* s_pPixelShaders[] = 
+	static char const* s_pPixelShaders[] =
 	{
 		"UnlitGeneric_NoTexture",
 		"UnlitGeneric",
@@ -896,12 +899,12 @@ void CBaseVSShader::SetHWMorphVertexShaderState( int nDimConst, int nSubrectCons
 //-----------------------------------------------------------------------------
 // Vertex shader unlit generic pass
 //-----------------------------------------------------------------------------
-void CBaseVSShader::VertexShaderUnlitGenericPass( int baseTextureVar, int frameVar, 
-												  int baseTextureTransformVar, 
+void CBaseVSShader::VertexShaderUnlitGenericPass( int baseTextureVar, int frameVar,
+												  int baseTextureTransformVar,
 												  int detailVar, int detailTransform,
 												  bool bDetailTransformIsScale,
 												  int envmapVar, int envMapFrameVar,
-												  int envmapMaskVar, int envmapMaskFrameVar, 
+												  int envmapMaskVar, int envmapMaskFrameVar,
 												  int envmapMaskScaleVar, int envmapTintVar,
 												  int alphaTestReferenceVar,
 												  int nDetailBlendModeVar,
@@ -920,7 +923,7 @@ void CBaseVSShader::VertexShaderUnlitGenericPass( int baseTextureVar, int frameV
 	{
 		bMask = params[envmapMaskVar]->IsTexture();
 	}
-	bool bDetail = (detailVar >= 0) && params[detailVar]->IsTexture(); 
+	bool bDetail = (detailVar >= 0) && params[detailVar]->IsTexture();
 	bool bBaseTexture = (baseTextureVar >= 0) && params[baseTextureVar]->IsTexture();
 	bool bVertexColor = IS_FLAG_SET(MATERIAL_VAR_VERTEXCOLOR);
 	bool bEnvmapCameraSpace = IS_FLAG_SET(MATERIAL_VAR_ENVMAPCAMERASPACE);
@@ -1054,7 +1057,7 @@ void CBaseVSShader::VertexShaderUnlitGenericPass( int baseTextureVar, int frameV
 		}
 
 		SetModulationVertexShaderDynamicState();
-	
+
 		float flConsts[12]={ 0, 0, 0, 1, 				// color
 			0, 0, 0, 0,					// max
 			0, 0, 0, .5,				// min
@@ -1090,7 +1093,7 @@ void CBaseVSShader::DrawWorldBaseTexture( int baseTextureVar, int baseTextureTra
 	if( IsSnapshotting() )
 	{
 		s_pShaderShadow->EnableTexture( SHADER_SAMPLER0, true );
-		s_pShaderShadow->VertexShaderVertexFormat( 
+		s_pShaderShadow->VertexShaderVertexFormat(
 			VERTEX_POSITION, 1, 0, 0 );
 		s_pShaderShadow->SetPixelShader( "sdk_lightmappedgeneric_basetexture" );
 		SetNormalBlendingShadowState();
@@ -1169,7 +1172,7 @@ void CBaseVSShader::DrawWorldBumpedDiffuseLighting( int bumpmapVar, int bumpFram
 }
 
 void CBaseVSShader::DrawWorldBumpedDiffuseLighting_Base_ps14( int bumpmapVar, int bumpFrameVar,
-											  int bumpTransformVar, 
+											  int bumpTransformVar,
 											  int baseTextureVar, int baseTextureTransformVar, int frameVar )
 {
 	if( IsSnapshotting() )
@@ -1213,9 +1216,9 @@ void CBaseVSShader::DrawWorldBumpedDiffuseLighting_Base_ps14( int bumpmapVar, in
 
 void CBaseVSShader::DrawWorldBumpedDiffuseLighting_Blend_ps14( int bumpmapVar, int bumpFrameVar,
 											int bumpTransformVar,
-											int baseTextureVar, int baseTextureTransformVar, 
+											int baseTextureVar, int baseTextureTransformVar,
 											int baseTextureFrameVar,
-											int baseTexture2Var, int baseTextureTransform2Var, 
+											int baseTexture2Var, int baseTextureTransform2Var,
 											int baseTextureFrame2Var)
 {
 	if( IsSnapshotting() )
@@ -1290,7 +1293,7 @@ void CBaseVSShader::DrawWorldBumpedSpecularLighting( int bumpmapVar, int envmapV
 			s_pShaderShadow->BlendFunc( SHADER_BLEND_SRC_ALPHA, SHADER_BLEND_ONE );
 		}
 		// FIXME: Remove the normal (needed for tangent space gen)
-		s_pShaderShadow->VertexShaderVertexFormat( 
+		s_pShaderShadow->VertexShaderVertexFormat(
 			VERTEX_POSITION | VERTEX_NORMAL | VERTEX_TANGENT_S |
 			VERTEX_TANGENT_T, 1, 0, 0 );
 
@@ -1336,7 +1339,7 @@ void CBaseVSShader::DrawWorldBumpedSpecularLighting( int bumpmapVar, int envmapV
 			vshIndex.SetDOWATERFOG( s_pShaderAPI->GetSceneFogMode() == MATERIAL_FOG_LINEAR_BELOW_FOG_Z );
 			s_pShaderAPI->SetVertexShaderIndex( vshIndex.GetIndex() );
 		}
-				
+
 		SetEnvMapTintPixelShaderDynamicState( 0, envmapTintVar, alphaVar );
 		// GR - fudge consts a bit to fix const/lerp issues
 		SetPixelShaderConstantFudge( 1, envmapContrastVar );
@@ -1367,7 +1370,7 @@ void CBaseVSShader::DrawModelBumpedSpecularLighting( int bumpMapVar, int bumpMap
 											   bool bBlendSpecular, bool bNoWriteZ )
 {
 	IMaterialVar** params = s_ppParams;
-	
+
 	if( IsSnapshotting() )
 	{
 		SetInitialShadowState( );
@@ -1392,8 +1395,8 @@ void CBaseVSShader::DrawModelBumpedSpecularLighting( int bumpMapVar, int bumpMap
 			s_pShaderShadow->EnableBlending( false );
 			SetNormalBlendingShadowState( -1, false );
 		}
-				
-		s_pShaderShadow->VertexShaderVertexFormat( 
+
+		s_pShaderShadow->VertexShaderVertexFormat(
 			VERTEX_POSITION | VERTEX_NORMAL, 1, 0, 4 /* userDataSize */ );
 
 		bool bHasNormalMapAlphaEnvMapMask = IS_FLAG_SET( MATERIAL_VAR_NORMALMAPALPHAENVMAPMASK );
@@ -1437,7 +1440,7 @@ void CBaseVSShader::DrawModelBumpedSpecularLighting( int bumpMapVar, int bumpMap
 		{
 			s_pShaderAPI->BindStandardTexture( SHADER_SAMPLER4, TEXTURE_NORMALIZATION_CUBEMAP );
 		}
-				
+
 		if( bBlendSpecular )
 		{
 			SetEnvMapTintPixelShaderDynamicState( 0, envMapTintVar, -1 );
@@ -1451,7 +1454,7 @@ void CBaseVSShader::DrawModelBumpedSpecularLighting( int bumpMapVar, int bumpMap
 		SetPixelShaderConstantFudge( 2, envMapSaturationVar );
 		float greyWeights[4] = { 0.299f, 0.587f, 0.114f, 0.0f };
 		s_pShaderAPI->SetPixelShaderConstant( 3, greyWeights );
-		
+
 		// handle scrolling of bump texture
 		SetVertexShaderTextureTransform( VERTEX_SHADER_SHADER_SPECIFIC_CONST_4, bumpTransformVar );
 
@@ -1473,9 +1476,9 @@ void CBaseVSShader::DrawModelBumpedSpecularLighting( int bumpMapVar, int bumpMap
 	Draw();
 }
 
-void CBaseVSShader::DrawBaseTextureBlend( int baseTextureVar, int baseTextureTransformVar, 
+void CBaseVSShader::DrawBaseTextureBlend( int baseTextureVar, int baseTextureTransformVar,
 									 int baseTextureFrameVar,
-									 int baseTexture2Var, int baseTextureTransform2Var, 
+									 int baseTexture2Var, int baseTextureTransform2Var,
 									 int baseTextureFrame2Var, int colorVar, int alphaVar )
 {
 	if( IsSnapshotting() )
@@ -1487,7 +1490,7 @@ void CBaseVSShader::DrawBaseTextureBlend( int baseTextureVar, int baseTextureTra
 		s_pShaderShadow->DrawFlags( SHADER_DRAW_POSITION | SHADER_DRAW_TEXCOORD0 |
 			SHADER_DRAW_LIGHTMAP_TEXCOORD1 );
 		// FIXME: Remove the normal (needed for tangent space gen)
-		s_pShaderShadow->VertexShaderVertexFormat( 
+		s_pShaderShadow->VertexShaderVertexFormat(
 			VERTEX_POSITION, 2, 0, 0 );
 
 		sdk_lightmappedgeneric_basetextureblend_Static_Index vshIndex;
@@ -1524,10 +1527,10 @@ void CBaseVSShader::DrawBaseTextureBlend( int baseTextureVar, int baseTextureTra
 }
 
 void CBaseVSShader::DrawWorldBumpedUsingVertexShader( int baseTextureVar, int baseTextureTransformVar,
-													  int bumpmapVar, int bumpFrameVar, 
+													  int bumpmapVar, int bumpFrameVar,
 													  int bumpTransformVar,
 													  int envmapMaskVar, int envmapMaskFrame,
-													  int envmapVar, 
+													  int envmapVar,
 													  int envmapFrameVar,
 													  int envmapTintVar, int colorVar, int alphaVar,
 													  int envmapContrastVar, int envmapSaturationVar,
@@ -1542,7 +1545,7 @@ void CBaseVSShader::DrawWorldBumpedUsingVertexShader( int baseTextureVar, int ba
 	// Draw base texture
 	bool bMultiplyDiffuseLighting = false;
 	bool bBlendSpecular = false;
-	
+
 	// Draw base texture(s)
 	if( doBaseTexture2 && params[baseTexture2Var]->IsTexture() && params[baseTextureVar]->IsTexture() )
 	{
@@ -1565,7 +1568,7 @@ void CBaseVSShader::DrawWorldBumpedUsingVertexShader( int baseTextureVar, int ba
 	// Draw diffuse lighting
 	if( params[baseTextureVar]->IsTexture() || !params[envmapVar]->IsTexture() )
 	{
-		DrawWorldBumpedDiffuseLighting( bumpmapVar, bumpFrameVar, bumpTransformVar, 
+		DrawWorldBumpedDiffuseLighting( bumpmapVar, bumpFrameVar, bumpTransformVar,
 			bMultiplyDiffuseLighting, bSSBump );
 		bBlendSpecular = true;
 	}
@@ -1606,7 +1609,7 @@ BlendType_t CBaseVSShader::EvaluateBlendRequirements( int textureVar, bool isBas
 	}
 
 	if ( CurrentMaterialVarFlags() & MATERIAL_VAR_ADDITIVE )
-	{	
+	{
 		return isTranslucent ? BT_BLENDADD : BT_ADD;	// Additive
 	}
 	else
@@ -1682,7 +1685,7 @@ void CBaseVSShader::DrawFlashlight_dx80( IMaterialVar** params, IShaderDynamicAP
 
 		if ( IS_FLAG_SET( MATERIAL_VAR_ALPHATEST ) )
 		{
-			// use zfunc zequals since alpha isn't guaranteed to 
+			// use zfunc zequals since alpha isn't guaranteed to
 			// be the same on both the regular pass and the flashlight pass.
 			pShaderShadow->DepthFunc( SHADER_DEPTHFUNC_EQUAL );
 		}
@@ -1704,7 +1707,7 @@ void CBaseVSShader::DrawFlashlight_dx80( IMaterialVar** params, IShaderDynamicAP
 		{
 			SetAdditiveBlendingShadowState( BASETEXTURE, true );
 		}
-		
+
 		pShaderShadow->EnableTexture( SHADER_SAMPLER0, true );
 		pShaderShadow->EnableTexture( SHADER_SAMPLER1, true );
 		pShaderShadow->EnableTexture( SHADER_SAMPLER2, true );
@@ -1819,7 +1822,7 @@ void CBaseVSShader::DrawFlashlight_dx80( IMaterialVar** params, IShaderDynamicAP
 #endif // support_dx8
 
 #ifdef STDSHADER_DX9_DLL_EXPORT
-void CBaseVSShader::DrawFlashlight_dx90( IMaterialVar** params, IShaderDynamicAPI *pShaderAPI, 
+void CBaseVSShader::DrawFlashlight_dx90( IMaterialVar** params, IShaderDynamicAPI *pShaderAPI,
 										IShaderShadow* pShaderShadow, DrawFlashlight_dx90_Vars_t &vars )
 {
 	// FLASHLIGHTFIXME: hack . . need to fix the vertex shader so that it can deal with and without bumps for vertexlitgeneric
@@ -1892,7 +1895,7 @@ void CBaseVSShader::DrawFlashlight_dx90( IMaterialVar** params, IShaderDynamicAP
 			if ( nDetailBlendMode != 0 ) //Not Mod2X
 				pShaderShadow->EnableSRGBRead( SHADER_SAMPLER8, true );
 		}
-		
+
 		pShaderShadow->EnableSRGBWrite( true );
 
 		if( vars.m_bLightmappedGeneric )
@@ -2117,7 +2120,7 @@ void CBaseVSShader::InitParamsUnlitGeneric_DX8(
 		int detailScaleVar,
 		int envmapOptionalVar,
 		int envmapVar,
-		int envmapTintVar, 
+		int envmapTintVar,
 		int envmapMaskScaleVar,
 		int nDetailBlendMode )
 {
@@ -2265,6 +2268,23 @@ void CBaseVSShader::DrawEqualDepthToDestAlpha( void )
 #endif
 }
 
+IShaderAPI* g_pShaderAPI = NULL;
+void CBaseVSShader::BindVertexTexture( VertexTextureSampler_t vtSampler, int nTextureVar, int nFrame /* = 0  */ )
+{
+	Assert( !IsSnapshotting() );
+
+	IMaterialVar* pTextureVar = s_ppParams[nTextureVar];
+	if ( !pTextureVar || pTextureVar->GetType() != MATERIAL_VAR_TYPE_TEXTURE )
+		return;
+
+	g_pShaderAPI->BindVertexTexture( vtSampler, GetShaderAPITextureBindHandle( pTextureVar->GetTextureValue(), nFrame ) );
+}
+
+ShaderAPITextureHandle_t CBaseVSShader::GetShaderAPITextureBindHandle( ITexture *pTexture, int nFrame, int nTextureChannel )
+{
+	return g_pSLShaderSystem->GetShaderAPITextureBindHandle( pTexture, nFrame, nTextureChannel );
+}
+
 class CShaderExtension : public IShaderExtension
 {
 public:
@@ -2363,3 +2383,114 @@ bool SetupUberlightFromState( UberlightUploadFunc func, FlashlightState_t const 
 	func( PSREG_UBERLIGHT_WORLD_TO_LIGHT, m.Base(), 4 );
 	return true;
 }
+
+// this exists in shaderapi.lib
+class CShaderDLL : public IShaderDLLInternal, public IShaderDLL
+{
+public:
+	CShaderDLL();
+
+	// methods of IShaderDLL
+	virtual bool Connect( CreateInterfaceFn factory );
+	virtual void Disconnect();
+	virtual int ShaderCount() const;
+	virtual IShader *GetShader( int nShader );
+
+	// methods of IShaderDLLInternal
+	virtual bool Connect( CreateInterfaceFn factory, bool bIsMaterialSystem );
+	virtual void Disconnect( bool bIsMaterialSystem );
+	virtual void InsertShader( IShader *pShader );
+
+private:
+	CUtlVector< IShader * >	m_ShaderList;
+};
+
+/*class HookVirtual : public subhook::Hook
+{
+public:
+	HookVirtual( void* base, uint index, void* hookFunc )
+	{
+		void** pVMT = *static_cast<void***>( base );
+		void*  pTarget = pVMT[index];
+
+		Install( pTarget, hookFunc );
+	}
+};*/
+
+static CDllDemandLoader shaderapidx9( "shaderapidx9" );
+class CShaderDLL2 : public CShaderDLL
+{
+public:
+	CShaderDLL2()
+	{
+	}
+
+	bool Connect( CreateInterfaceFn factory, bool bIsMaterialSystem ) override
+	{
+		const bool bRet = CShaderDLL::Connect( factory, bIsMaterialSystem );
+		g_pShaderAPI = ( IShaderAPI* )shaderapidx9.GetFactory()( SHADERAPI_INTERFACE_VERSION, NULL );
+
+		//if ( GetShadowDepthFmtHook == NULL )
+		{
+			//GetShadowDepthFmtHook = new HookVirtual( g_pShaderAPI, 239, reinterpret_cast<void*>( &GetShadowDepthFmt ) );
+		}
+
+		return bRet && g_pShaderAPI != NULL;
+	}
+
+	void Disconnect() override
+	{
+		/*if ( GetShadowDepthFmtHook != NULL )
+		{
+			delete GetShadowDepthFmtHook;
+			GetShadowDepthFmtHook = NULL;
+		}*/
+		CShaderDLL::Disconnect();
+	}
+
+private:
+	/*static ImageFormat GetShadowDepthFmt( void* thisptr )
+	{
+		using Func = decltype( GetShadowDepthFmt )*;
+		const Func original = reinterpret_cast<Func>( GetShadowDepthFmtHook->GetTrampoline() );
+		const ImageFormat fmt = original( thisptr );
+		switch ( fmt )
+		{
+		case IMAGE_FORMAT_ATI_DST16:
+			return IMAGE_FORMAT_ATI_DST24;
+		case IMAGE_FORMAT_NV_DST16:
+			return IMAGE_FORMAT_NV_DST24;
+		default:
+			return fmt;
+		}
+	}*/
+
+	//static HookVirtual* GetShadowDepthFmtHook;
+};
+//HookVirtual* CShaderDLL2::GetShadowDepthFmtHook = NULL;
+
+static CShaderDLL2* s_pShaderDLL = NULL;
+
+IShaderDLL *GetShaderDLL()
+{
+	// Pattern necessary because shaders register themselves in global constructors
+	if ( !s_pShaderDLL )
+	{
+		s_pShaderDLL = new CShaderDLL2;
+	}
+
+	return s_pShaderDLL;
+}
+
+IShaderDLLInternal *GetShaderDLLInternal()
+{
+	// Pattern necessary because shaders register themselves in global constructors
+	if ( !s_pShaderDLL )
+	{
+		s_pShaderDLL = new CShaderDLL2;
+	}
+
+	return static_cast<IShaderDLLInternal*>( s_pShaderDLL );
+}
+
+EXPOSE_INTERFACE_FN( ( InstantiateInterfaceFn )GetShaderDLLInternal, IShaderDLLInternal, SHADER_DLL_INTERFACE_VERSION );

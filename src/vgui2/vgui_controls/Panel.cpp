@@ -913,7 +913,7 @@ void Panel::SetPos(int x, int y)
 {
 	if ( !HushAsserts() )
 	{
-		Assert( fabsf(x) < 32768 && fabsf(y) < 32768 );
+		Assert( abs(x) < 32768 && abs(y) < 32768 );
 	}
 	ipanel()->SetPos(GetVPanel(), x, y);
 }
@@ -951,7 +951,7 @@ int Panel::GetYPos()
 //-----------------------------------------------------------------------------
 void Panel::SetSize(int wide, int tall)
 {
-	Assert( fabsf(wide) < 32768 && fabsf(tall) < 32768 );
+	Assert( abs(wide) < 32768 && abs(tall) < 32768 );
 	ipanel()->SetSize(GetVPanel(), wide, tall);
 }
 
@@ -7106,8 +7106,8 @@ bool Panel::CanStartDragging( int startx, int starty, int mx, int my )
 		return false;
 	}
 
-	int deltax = fabsf( mx - startx );
-	int deltay = fabsf( my - starty );
+	int deltax = abs( mx - startx );
+	int deltay = abs( my - starty );
 	if ( deltax > m_pDragDrop->m_nDragStartTolerance ||
 		 deltay > m_pDragDrop->m_nDragStartTolerance )
 	{

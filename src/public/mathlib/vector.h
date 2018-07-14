@@ -520,7 +520,6 @@ inline constexpr Vector::Vector( vec_t X, vec_t Y, vec_t Z ) : x( X ), y( Y ), z
 
 inline constexpr Vector::Vector( vec_t XYZ ) : x( XYZ ), y( XYZ ), z( XYZ )
 {
-	x = y = z = XYZ;
 	CHECK_VALID( *this );
 }
 
@@ -1887,7 +1886,7 @@ inline constexpr QAngle::QAngle( void )
 
 inline constexpr QAngle::QAngle( vec_t X, vec_t Y, vec_t Z ) : x(X), y(Y), z(Z)
 {
-	CHECK_VALID( *this );
+	//CHECK_VALID( *this );
 }
 
 

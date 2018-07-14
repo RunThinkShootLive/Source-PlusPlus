@@ -1,6 +1,6 @@
 //========= Copyright Valve Corporation, All rights reserved. ============//
 //
-// Purpose: 
+// Purpose:
 //
 //=============================================================================//
 
@@ -45,7 +45,7 @@ float UTIL_VecToYaw( const Vector &vec )
 {
 	if (vec.y == 0 && vec.x == 0)
 		return 0;
-	
+
 	float yaw = atan2( vec.y, vec.x );
 
 	yaw = RAD2DEG(yaw);
@@ -85,7 +85,7 @@ float UTIL_VecToYaw( const matrix3x4_t &matrix, const Vector &vec )
 
 	if (x == 0.0f && y == 0.0f)
 		return 0.0f;
-	
+
 	float yaw = atan2( -y, x );
 
 	yaw = RAD2DEG(yaw);
@@ -107,7 +107,7 @@ float UTIL_VecToPitch( const matrix3x4_t &matrix, const Vector &vec )
 
 	if (x == 0.0f && z == 0.0f)
 		return 0.0f;
-	
+
 	float pitch = atan2( z, x );
 
 	pitch = RAD2DEG(pitch);
@@ -121,7 +121,7 @@ float UTIL_VecToPitch( const matrix3x4_t &matrix, const Vector &vec )
 Vector UTIL_YawToVector( float yaw )
 {
 	Vector ret;
-	
+
 	ret.z = 0;
 	float angle = DEG2RAD( yaw );
 	SinCos( angle, &ret.y, &ret.x );
@@ -131,9 +131,9 @@ Vector UTIL_YawToVector( float yaw )
 
 //-----------------------------------------------------------------------------
 // Purpose: Helper function get get determinisitc random values for shared/prediction code
-// Input  : seedvalue - 
-//			*module - 
-//			line - 
+// Input  : seedvalue -
+//			*module -
+//			line -
 // Output : static int
 //-----------------------------------------------------------------------------
 static int SeedFileLineHash( int seedvalue, const char *sharedname, int additionalSeed )
@@ -145,7 +145,7 @@ static int SeedFileLineHash( int seedvalue, const char *sharedname, int addition
 	CRC32_ProcessBuffer( &retval, (void *)&seedvalue, sizeof( int ) );
 	CRC32_ProcessBuffer( &retval, (void *)&additionalSeed, sizeof( int ) );
 	CRC32_ProcessBuffer( &retval, (void *)sharedname, Q_strlen( sharedname ) );
-	
+
 	CRC32_Final( &retval );
 
 	return (int)( retval );
@@ -206,7 +206,7 @@ QAngle SharedRandomAngle( const char *sharedname, float minVal, float maxVal, in
 // Shared client/server trace filter code
 //
 //-----------------------------------------------------------------------------
-bool PassServerEntityFilter( const IHandleEntity *pTouch, const IHandleEntity *pPass ) 
+bool PassServerEntityFilter( const IHandleEntity *pTouch, const IHandleEntity *pPass )
 {
 	if ( !pPass )
 		return true;
@@ -222,10 +222,10 @@ bool PassServerEntityFilter( const IHandleEntity *pTouch, const IHandleEntity *p
 	// don't clip against own missiles
 	if ( pEntTouch->GetOwnerEntity() == pEntPass )
 		return false;
-	
+
 	// don't clip against owner
 	if ( pEntPass->GetOwnerEntity() == pEntTouch )
-		return false;	
+		return false;
 
 
 	return true;
@@ -256,10 +256,10 @@ bool StandardFilterRules( IHandleEntity *pHandleEntity, int fContentsMask )
 	if ( !(fContentsMask & CONTENTS_WINDOW) && pCollide->IsTransparent() )
 		return false;
 
-	// FIXME: this is to skip BSP models that are entities that can be 
-	// potentially moved/deleted, similar to a monster but doors don't seem to 
+	// FIXME: this is to skip BSP models that are entities that can be
+	// potentially moved/deleted, similar to a monster but doors don't seem to
 	// be flagged as monsters
-	// FIXME: the FL_WORLDBRUSH looked promising, but it needs to be set on 
+	// FIXME: the FL_WORLDBRUSH looked promising, but it needs to be set on
 	// everything that's actually a worldbrush and it currently isn't
 	if ( !(fContentsMask & CONTENTS_MOVEABLE) && (pCollide->GetMoveType() == MOVETYPE_PUSH))// !(touch->flags & FL_WORLDBRUSH) )
 		return false;
@@ -379,7 +379,7 @@ CTraceFilterSimpleList::CTraceFilterSimpleList( int collisionGroup ) :
 
 
 //-----------------------------------------------------------------------------
-// Purpose: 
+// Purpose:
 //-----------------------------------------------------------------------------
 bool CTraceFilterSimpleList::ShouldHitEntity( IHandleEntity *pHandleEntity, int contentsMask )
 {
@@ -408,7 +408,7 @@ CTraceFilterLOS::CTraceFilterLOS( IHandleEntity *pHandleEntity, int collisionGro
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
+// Purpose:
 //-----------------------------------------------------------------------------
 bool CTraceFilterLOS::ShouldHitEntity( IHandleEntity *pHandleEntity, int contentsMask )
 {
@@ -429,7 +429,7 @@ CTraceFilterSimple( passentity, collisionGroup ), m_pchClassname( pchClassname )
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
+// Purpose:
 //-----------------------------------------------------------------------------
 bool CTraceFilterSkipClassname::ShouldHitEntity( IHandleEntity *pHandleEntity, int contentsMask )
 {
@@ -467,7 +467,7 @@ CTraceFilterSimple( passentity, collisionGroup )
 
 
 //-----------------------------------------------------------------------------
-// Purpose: 
+// Purpose:
 //-----------------------------------------------------------------------------
 bool CTraceFilterSimpleClassnameList::ShouldHitEntity( IHandleEntity *pHandleEntity, int contentsMask )
 {
@@ -514,9 +514,9 @@ bool CTraceFilterChain::ShouldHitEntity( IHandleEntity *pHandleEntity, int conte
 }
 
 //-----------------------------------------------------------------------------
-// Sweeps against a particular model, using collision rules 
+// Sweeps against a particular model, using collision rules
 //-----------------------------------------------------------------------------
-void UTIL_TraceModel( const Vector &vecStart, const Vector &vecEnd, const Vector &hullMin, 
+void UTIL_TraceModel( const Vector &vecStart, const Vector &vecEnd, const Vector &hullMin,
 					  const Vector &hullMax, CBaseEntity *pentModel, int collisionGroup, trace_t *ptr )
 {
 	// Cull it....
@@ -524,7 +524,7 @@ void UTIL_TraceModel( const Vector &vecStart, const Vector &vecEnd, const Vector
 	{
 		Ray_t ray;
 		ray.Init( vecStart, vecEnd, hullMin, hullMax );
-		enginetrace->ClipRayToEntity( ray, MASK_ALL, pentModel, ptr ); 
+		enginetrace->ClipRayToEntity( ray, MASK_ALL, pentModel, ptr );
 	}
 	else
 	{
@@ -547,14 +547,14 @@ bool UTIL_EntityHasMatchingRootParent( CBaseEntity *pRootParent, CBaseEntity *pE
 }
 
 //-----------------------------------------------------------------------------
-// Sweep an entity from the starting to the ending position 
+// Sweep an entity from the starting to the ending position
 //-----------------------------------------------------------------------------
 class CTraceFilterEntity : public CTraceFilterSimple
 {
 	DECLARE_CLASS( CTraceFilterEntity, CTraceFilterSimple );
 
 public:
-	CTraceFilterEntity( CBaseEntity *pEntity, int nCollisionGroup ) 
+	CTraceFilterEntity( CBaseEntity *pEntity, int nCollisionGroup )
 		: CTraceFilterSimple( pEntity, nCollisionGroup )
 	{
 		m_pRootParent = pEntity->GetRootMoveParent();
@@ -602,7 +602,7 @@ class CTraceFilterEntityIgnoreOther : public CTraceFilterEntity
 {
 	DECLARE_CLASS( CTraceFilterEntityIgnoreOther, CTraceFilterEntity );
 public:
-	CTraceFilterEntityIgnoreOther( CBaseEntity *pEntity, const IHandleEntity *pIgnore, int nCollisionGroup ) : 
+	CTraceFilterEntityIgnoreOther( CBaseEntity *pEntity, const IHandleEntity *pIgnore, int nCollisionGroup ) :
 		CTraceFilterEntity( pEntity, nCollisionGroup ), m_pIgnoreOther( pIgnore )
 	{
 	}
@@ -620,7 +620,7 @@ private:
 };
 
 //-----------------------------------------------------------------------------
-// Sweeps a particular entity through the world 
+// Sweeps a particular entity through the world
 //-----------------------------------------------------------------------------
 void UTIL_TraceEntity( CBaseEntity *pEntity, const Vector &vecAbsStart, const Vector &vecAbsEnd, unsigned int mask, trace_t *ptr )
 {
@@ -639,7 +639,7 @@ void UTIL_TraceEntity( CBaseEntity *pEntity, const Vector &vecAbsStart, const Ve
 #endif
 }
 
-void UTIL_TraceEntity( CBaseEntity *pEntity, const Vector &vecAbsStart, const Vector &vecAbsEnd, 
+void UTIL_TraceEntity( CBaseEntity *pEntity, const Vector &vecAbsStart, const Vector &vecAbsEnd,
 					  unsigned int mask, const IHandleEntity *pIgnore, int nCollisionGroup, trace_t *ptr )
 {
 	ICollideable *pCollision;
@@ -658,7 +658,7 @@ void UTIL_TraceEntity( CBaseEntity *pEntity, const Vector &vecAbsStart, const Ve
 #endif
 }
 
-void UTIL_TraceEntity( CBaseEntity *pEntity, const Vector &vecAbsStart, const Vector &vecAbsEnd, 
+void UTIL_TraceEntity( CBaseEntity *pEntity, const Vector &vecAbsStart, const Vector &vecAbsEnd,
 					  unsigned int mask, ITraceFilter *pFilter, trace_t *ptr )
 {
 	ICollideable *pCollision;
@@ -677,7 +677,7 @@ void UTIL_TraceEntity( CBaseEntity *pEntity, const Vector &vecAbsStart, const Ve
 
 // ----
 // This is basically a regular TraceLine that uses the FilterEntity filter.
-void UTIL_TraceLineFilterEntity( CBaseEntity *pEntity, const Vector &vecAbsStart, const Vector &vecAbsEnd, 
+void UTIL_TraceLineFilterEntity( CBaseEntity *pEntity, const Vector &vecAbsStart, const Vector &vecAbsEnd,
 					   unsigned int mask, int nCollisionGroup, trace_t *ptr )
 {
 	CTraceFilterEntity traceFilter( pEntity, nCollisionGroup );
@@ -725,7 +725,7 @@ void UTIL_ClipTraceToPlayers( const Vector& vecAbsStart, const Vector& vecAbsEnd
 //-----------------------------------------------------------------------------
 // Purpose: Make a tracer using a particle effect
 //-----------------------------------------------------------------------------
-void UTIL_ParticleTracer( const char *pszTracerEffectName, const Vector &vecStart, const Vector &vecEnd, 
+void UTIL_ParticleTracer( const char *pszTracerEffectName, const Vector &vecStart, const Vector &vecEnd,
 				 int iEntIndex, int iAttachment, bool bWhiz )
 {
 	int iParticleIndex = GetParticleSystemIndex( pszTracerEffectName );
@@ -735,7 +735,7 @@ void UTIL_ParticleTracer( const char *pszTracerEffectName, const Vector &vecStar
 //-----------------------------------------------------------------------------
 // Purpose: Make a tracer effect using the old, non-particle system, tracer effects.
 //-----------------------------------------------------------------------------
-void UTIL_Tracer( const Vector &vecStart, const Vector &vecEnd, int iEntIndex, 
+void UTIL_Tracer( const Vector &vecStart, const Vector &vecEnd, int iEntIndex,
 				 int iAttachment, float flVelocity, bool bWhiz, const char *pCustomTracerName, int iParticleID )
 {
 	CEffectData data;
@@ -806,7 +806,7 @@ void UTIL_BloodDrips( const Vector &origin, const Vector &direction, int color, 
 		// Normal blood impact
 		UTIL_BloodImpact( origin, direction, color, amount );
 	}
-}	
+}
 
 //-----------------------------------------------------------------------------
 // Purpose: Returns low violence settings
@@ -883,11 +883,11 @@ void UTIL_BloodDecalTrace( trace_t *pTrace, int bloodColor )
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
-// Input  : &pos - 
-//			&dir - 
-//			color - 
-//			amount - 
+// Purpose:
+// Input  : &pos -
+//			&dir -
+//			color -
+//			amount -
 //-----------------------------------------------------------------------------
 void UTIL_BloodImpact( const Vector &pos, const Vector &dir, int color, int amount )
 {
@@ -1000,7 +1000,7 @@ void UTIL_DecodeICE( unsigned char * buffer, int size, const unsigned char *key)
 	unsigned char *temp = (unsigned char *)_alloca( PAD_NUMBER( size, blockSize ) );
 	unsigned char *p1 = buffer;
 	unsigned char *p2 = temp;
-				
+
 	// encrypt data in 8 byte blocks
 	int bytesLeft = size;
 	while ( bytesLeft >= blockSize )
@@ -1102,7 +1102,7 @@ int find_day_of_week( struct tm& found_day, int day_of_week, int step )
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
+// Purpose:
 //-----------------------------------------------------------------------------
 #ifdef USES_ECON_ITEMS
 static bool					  s_HolidaysCalculated = false;
@@ -1146,7 +1146,7 @@ bool UTIL_IsHolidayActive( /*EHoliday*/ int eHoliday )
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
+// Purpose:
 //-----------------------------------------------------------------------------
 int	UTIL_GetHolidayForString( const char* pszHolidayName )
 {
@@ -1161,7 +1161,7 @@ int	UTIL_GetHolidayForString( const char* pszHolidayName )
 }
 
 //-----------------------------------------------------------------------------
-// Purpose: 
+// Purpose:
 //-----------------------------------------------------------------------------
 const char* UTIL_GetActiveHolidayString()
 {

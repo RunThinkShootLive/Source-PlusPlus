@@ -65,7 +65,7 @@ bool C_EnvLight::IsCascadedShadowMappingEnabled() const
 // CPrecisionSlider
 // A drop-in replacement for the slider class that contains a text entry that
 // can be used to read and set the current value.
-// Also provides mousewheel support.   
+// Also provides mousewheel support.
 //-----------------------------------------------------------------------------
 class CPrecisionSlider : public vgui::FloatSlider
 {
@@ -130,7 +130,7 @@ void CPrecisionSlider::OnSizeChanged( int wide, int tall )
 }
 
 //-----------------------------------------------------------------------------
-// Override GetTrackRect in order to adjust for the text entry 
+// Override GetTrackRect in order to adjust for the text entry
 //-----------------------------------------------------------------------------
 void CPrecisionSlider::GetTrackRect( int &x, int &y, int &w, int &h )
 {
@@ -221,18 +221,18 @@ CCSMTweakPanel::CCSMTweakPanel( vgui::VPANEL parent ): Frame( NULL, "CCSMTweakPa
 {
 	SetParent( parent );
 	near.pOrthoSize = new CPrecisionSlider( this, "nearOrthoSize" );
-	near.pOrthoSize->SetRange( 0, 1024 );
+	near.pOrthoSize->SetRange( 0, 4096 );
 	near.pForwardOffset = new CPrecisionSlider( this, "nearForwardOffset" );
-	near.pForwardOffset->SetRange( 0, 1024 );
+	near.pForwardOffset->SetRange( 0, 2048 );
 	near.pUVOffsetX = new CPrecisionSlider( this, "nearForwardOffsetX" );
 	near.pUVOffsetX->SetRange( 0, 1024 );
 	near.pViewDepthBiasHack = new CPrecisionSlider( this, "nearDepthBiasHack" );
 	near.pViewDepthBiasHack->SetRange( 0, 1024 );
 
 	far.pOrthoSize = new CPrecisionSlider( this, "farOrthoSize" );
-	far.pOrthoSize->SetRange( 0, 1024 );
+	far.pOrthoSize->SetRange( 0, 8192 );
 	far.pForwardOffset = new CPrecisionSlider( this, "farForwardOffset" );
-	far.pForwardOffset->SetRange( 0, 1024 );
+	far.pForwardOffset->SetRange( 0, 4096 );
 	far.pUVOffsetX = new CPrecisionSlider( this, "farForwardOffsetX" );
 	far.pUVOffsetX->SetRange( 0, 1024 );
 	far.pViewDepthBiasHack = new CPrecisionSlider( this, "farDepthBiasHack" );

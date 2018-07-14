@@ -21,7 +21,7 @@ ConVar glow_outline_effect_enable( "glow_outline_effect_enable", "1", FCVAR_ARCH
 ConVar glow_outline_effect_width( "glow_outline_width", "10.0f", FCVAR_CHEAT, "Width of glow outline effect in screen space." );
 
 #ifdef RTSL
-ConVar physcannon_tracelength( "physcannon_tracelength", "250" );
+ConVar physcannon_tracelength( "physcannon_tracelength", "250", FCVAR_REPLICATED );
 #endif
 
 extern bool g_bDumpRenderTargets; // in viewpostprocess.cpp

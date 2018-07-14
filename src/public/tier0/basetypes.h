@@ -1,6 +1,6 @@
 //========= Copyright Valve Corporation, All rights reserved. ============//
 //
-// Purpose: 
+// Purpose:
 //
 // $NoKeywords: $
 //=============================================================================//
@@ -27,7 +27,7 @@
 #include "protected_things.h"
 
 // There's a different version of this file in the xbox codeline
-// so the PC version built in the xbox branch includes things like 
+// so the PC version built in the xbox branch includes things like
 // tickrate changes.
 #include "xbox_codeline_defines.h"
 
@@ -166,7 +166,7 @@ typedef float vec_t;
 
 
 //-----------------------------------------------------------------------------
-// look for NANs, infinities, and underflows. 
+// look for NANs, infinities, and underflows.
 // This assumes the ANSI/IEEE 754-1985 standard
 //-----------------------------------------------------------------------------
 
@@ -299,7 +299,7 @@ template< class HandleType >
 class CBaseIntHandle
 {
 public:
-	
+
 	inline bool			operator==( const CBaseIntHandle &other )	{ return m_Handle == other.m_Handle; }
 	inline bool			operator!=( const CBaseIntHandle &other )	{ return m_Handle != other.m_Handle; }
 
