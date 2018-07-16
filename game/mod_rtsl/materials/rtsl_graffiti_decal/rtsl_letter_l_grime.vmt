@@ -1,0 +1,8 @@
+"LightmappedGeneric"
+{
+	"$basetexture" "rtsl_graffiti_decal/vtf/rtsl_letter_l_grime"
+	"$decal"		1
+	"$decalscale"	0.25
+	"$translucent" 	1
+	"$alpha"		0.8
+}

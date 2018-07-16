@@ -1,0 +1,11 @@
+"VertexLitGeneric"
+{
+	"$baseTexture" 	"Models/weapons/w_rocket_launcher/w_rpg_sheet"
+	"$envmap" "env_cubemap"	
+	"$envmapmask" "Models/weapons/w_rocket_launcher/w_rpg_mask"
+	"$selfillum" 1
+	"$model" 1
+}
+
+
+

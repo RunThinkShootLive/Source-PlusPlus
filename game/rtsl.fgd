@@ -1,0 +1,222 @@
+//====== Copyright © 1996-2005, Valve Corporation, All rights reserved. =======
+//
+// Purpose: Half-Life 2 game definition file (.fgd) 
+//
+//=============================================================================
+
+@include "halflife2.fgd"
+
+@NPCClass base(BaseHeadcrab, Parentname) studio("models/rtsl/mechacrab.mdl") = npc_headcrab_mecha : "Mechacrab"
+[
+]
+
+@PointClass base(Parentname,Angles,Targetname) sphere(DamageRadius) studio("models/props_combine/headcrabcannister01b.mdl") = env_headcrabcanister : "Headcrab canister"
+[
+	spawnflags(Flags) = 
+	[
+		1 :  "No Impact Sound" : 0
+		2 :  "No Launch Sound" : 0
+		4096 : "Start Impacted" : 0
+		8192 : "Land at initial position" : 0
+		16384 : "Wait for input to open" : 0
+		32768 : "Wait for input to spawn headcrabs" : 0
+		65536 : "No smoke" : 0
+		131072 : "No shake" : 0
+		262144 : "Remove on impact" : 0
+		524288 : "No impact effects" : 0
+	]
+	HeadcrabType(choices) : "Which headcrab to spawn?" : 0 =
+	[
+		0 : "Normal headcrabs"
+		1 : "Fast Headcrabs"
+		2 : "Poison Headcrabs"
+    3 : "Mecha Headcrabs (Combine)"
+	]
+	HeadcrabCount(integer) : "Headcrab count" : 6 : "Number of headcrabs to spawn on impact"
+	FlightSpeed(float) : "Flight Speed" : 3000  : "Speed to fly through the air"
+	FlightTime(float) : "Flight Time" : 5	    : "Time to fly through the air in seconds"
+	StartingHeight(float) : "Starting Height" : 0 : "Relative height from the landing position at which the canister should be launched. Positive values mean launch it above the impact point, negative values mean launch it below."
+	MinSkyboxRefireTime(float) : "Min Refire Time" : 0 : "Min number of seconds before the cannister is refired. This will only work for cannisters placed in the skybox."
+	MaxSkyboxRefireTime(float) : "Max Refire Time" : 0 : "Max number of seconds before the cannister is refired. This will only work for cannisters placed in the skybox."
+	SkyboxCannisterCount(integer) : "Cannister count" : 1 : "Number of cannisters to fire in the skybox (0 means fire continuously, forever)."
+	Damage(float) : "Impact damage" : 150 : "Max damage the canister applies on impact"
+	DamageRadius(float) : "Impact damage radius": 750 : "Max radius of the impact damage for the canister"
+	SmokeLifetime(float) : "Smoke Duration" : 30 : "Duration that the canister smokes.  -1 means always smoke."
+	LaunchPositionName(target_destination) : "Launch Position Name" : "" : "If the canister should launch to it's origin from another point within the world, this should specify an info_target at the launch origin."
+
+	// Inputs
+	input FireCanister(void) : "Fire the canister"
+	input OpenCanister(void) : "Opens the canister (must be called after the OnImpacted output is fired)"
+	input SpawnHeadcrabs(void) : "Spawns headcrabs (must be called after the OnImpacted output is fired and after OpenCanister is triggered, if the Wait for Input to open spawnflag is checked.)"
+	input StopSmoke(void) : "Stops the smoke if it's on"
+
+	// Outputs
+	output OnLaunched(string) : "Fired when the canister is launched"
+	output OnImpacted(void) : "Fires when canister hits the ground"
+	output OnOpened(void) : "Fires when canister has finished opening"
+]
+
+//-------------------------------------------------------------------------
+//
+//	Physics entities
+//
+//-------------------------------------------------------------------------
+
+@SolidClass base(BreakableBrush,Targetname, Origin, RenderFields, Shadow) = func_physbox : 
+	"A brush entity that's physically simulated."
+[
+	_minlight(string) : "Minimum Light Level" : : "The minimum level of ambient light that hits this brush."
+	spawnflags(flags) =
+	[
+		4096  : "Start Asleep" : 0
+		8192  : "Ignore +USE for Pickup" : 0
+		16384 : "Debris - Don't collide with the player or other debris" : 0
+		32768 : "Motion Disabled" : 0
+		65536 : "Use Preferred Carry Angles" : 0
+		131072: "Enable motion on Physcannon grab" : 0
+		262144: "Not affected by rotor wash" : 0
+		524288: "Generate output on +USE " : 1
+		1048576 : "Physgun can ALWAYS pick up. No matter what." : 0
+		2097152 : "Physgun is NOT allowed to pick this up." : 0 
+		4194304 : "Physgun is NOT allowed to punt this object." : 0
+		8388608: "Prevent motion enable on player bump" : 0
+    16777216: "RTSL: Can be unfrozen by Gravity Gun tertiary attack (Requires Motion Disabled)" : 0
+	]
+	
+	Damagetype(choices) : "Impact Damage Type" : 0 =
+	[
+		0: "Blunt"
+		1: "Sharp"
+	]
+	
+	massScale(float) : "Mass Scale" : "0" : "A scale multiplier for the object's mass."
+	overridescript(string) : "Override Parameters" : "" : "A list of physics key/value pairs that are usually in a physics prop .qc file. Format is 'key,value,key,value,etc'."
+	damagetoenablemotion(integer) : "Health Level to Override Motion" : 0 : "If specified, this object will start motion disabled. Once its health has dropped below this specified amount, it will enable motion."
+	forcetoenablemotion(float) : "Physics Impact Force to Override Motion" : 0 : "If specified, this object will start motion disabled. Any impact that imparts a force greater than this value on the physbox will enable motion."
+	health(integer) : "Strength" : 0 : "Number of points of damage to take before breaking.  0 means don't break."
+	preferredcarryangles(vector) : "Preferred Player-carry Angles" : "0 0 0" : "If the 'Use Preferred Carry Angles' spawnflag is set, this angle is the angle which the object should orient to when the player picks it up, with the physgun or +USE."
+	notsolid(choices) : "Not solid to world" : 0 =
+	[
+		0: "Solid to World"
+		1: "Passes through World"
+	]
+	
+	// Inputs
+	input Wake(void) : "Wake up this physics object, if it is sleeping."
+	input Sleep(void) : "Put this physics object to sleep. It will wake if given the Wake input, or if force is applied to it. Note that physics objects go to sleep automatically after coming to rest for a while, so you don't really need to use this."
+	input EnableMotion(void) : "Enable physics motion/collision response."
+	input DisableMotion(void) : "Disable physics motion/collision response."
+	input ForceDrop(void) : "If this object is being carried by a player, with the physgun or +USE, force it to be dropped."
+  input GGFreeze(void) : "RTSL: Disable physics motion and set the object state as frozen. (unfreezable by the Gravity Gun's tertiary attack)"
+  input GGUnFreeze(void) : "RTSL: Enable physics motion and set the object as unfrozen."
+	
+	// Outputs
+	output OnDamaged(void) : "Fired when this entity is damaged."
+	output OnAwakened(void) : "Fired when this entity becomes awake (collision/force is applied)."
+	output OnMotionEnabled(void) : "Fired when motion is enabled due to damage/physcannon/force."
+	output OnPhysGunPickup(void) : "Fired when a player picks this object up, either with the physgun or +USE."
+	output OnPhysGunPunt(void) : "Fired when a player punts this object with the physgun."
+	output OnPhysGunOnlyPickup(void) : "Fired when a player picks this object up WITH THE PHYSGUN. +USE pickups do not fire this output."
+	output OnPhysGunDrop(void) : "Fired when a player drops this object."
+	output OnPlayerUse(void) : "Fired when the player tries to +USE the physbox. This output will fire only if the Generate output on +USE spawnflag is set."
+]
+
+@PointClass base(BasePropPhysics, RenderFields) studioprop() sphere(fademindist) sphere(fademaxdist) = prop_physics :
+	"A prop that physically simulates as a single rigid body. It can be constrained to other physics objects using hinges "+
+	"or other constraints. It can also be configured to break when it takes enough damage. "+
+	"Note that the health of the object will be overridden by the health inside the model, to ensure consistent health game-wide. "+
+	"If the model used by the prop is configured to be used as a prop_dynamic (i.e. it should not be physically simulated) then it CANNOT be "+
+	"used as a prop_physics. Upon level load it will display a warning in the console and remove itself. Use a prop_dynamic instead."
+[
+  spawnflags(flags) = 
+	[
+		1 : "Start Asleep" : 0
+		2 : "Don't take physics damage" : 0
+		4 : "Debris - Don't collide with the player or other debris" : 0
+		8 : "Motion Disabled" : 0
+		64 : "Enable motion on Physcannon grab" : 0
+		128 : "Not affected by rotor wash" : 0
+		256 : "Generate output on +USE " : 1
+		512 : "Prevent pickup" : 0
+		1024: "Prevent motion enable on player bump" : 0
+		4096: "Debris with trigger interaction" : 0
+		8192: "Force server-side (Multiplayer only)" : 0
+		1048576: "Physgun can ALWAYS pick up. No matter what." : 0
+    8388608: "RTSL: Can be unfrozen by Gravity Gun tertiary attack (Requires Motion Disabled)" : 0 
+	]
+
+	// Inputs
+	input Ignite(void) : "Ignite, burst into flames."
+	input IgniteLifetime(float) : "Ignite, with a parameter lifetime."
+	input IgniteNumHitboxFires(integer) : "Ignite, with a parameternumber of hitbox fires."
+	input IgniteHitboxFireScale(float) : "Ignite, with a parameter hitbox fire scale."
+  input GGFreeze(void) : "RTSL: Disable physics motion and set the object state as frozen. (unfreezable by the Gravity Gun's tertiary attack)"
+  input GGUnFreeze(void) : "RTSL: Enable physics motion and set the object as unfrozen."
+]
+
+@PointClass base(Item) studio("models/gravgun_crystal/gravgun_crystal.mdl") = item_physcannon_freeze : "Gravity Gun tertiary attack module" []
+
+@PointClass base(Targetname) size(-16 -16 -16, 16 16 16) = player_weaponstrip : "Strips player's weapons"
+[
+	// Inputs
+	input Strip(void) : "Strip player's weapons"
+	input StripWeaponsAndSuit(void) : "Strip player's weapons and his suit"
+  input StripGGFreezeModule(void) : "Strip player's gravity gun freeze module"
+]
+
+@NPCClass base(BaseNPC) studio("models/Zombie/Classic.mdl") = npc_zombie : "Zombie"
+[
+  isheadless(choices) : "Spawn without headcrab" : 0 =
+	[
+		0 : "No"
+		1 : "Yes"
+	]
+  noheadcrabspawn(choices) : "Don't detach headcrab on death" : 0 =
+	[
+		0 : "No"
+		1 : "Yes"
+	]
+]
+
+@NPCClass base(BaseNPC) studio("models/Zombie/Classic_torso.mdl") = npc_zombie_torso : "Zombie Torso"
+[
+  isheadless(choices) : "Spawn Without Headcrab" : 0 =
+	[
+		0 : "No"
+		1 : "Yes"
+	]
+  noheadcrabspawn(choices) : "Don't Detach Headcrab On Death" : 0 =
+	[
+		0 : "No"
+		1 : "Yes"
+	]
+]
+
+@NPCClass base(BaseNPC) studio("models/Zombie/fast.mdl") = npc_fastzombie : "Fast Zombie"
+[
+	input AttachToVehicle(string) : "Attach to a specified vehicle entity"
+  isheadless(choices) : "Spawn Without Headcrab" : 0 =
+	[
+		0 : "No"
+		1 : "Yes"
+	]
+  noheadcrabspawn(choices) : "Don't Detach Headcrab On Death" : 0 =
+	[
+		0 : "No"
+		1 : "Yes"
+	]
+]
+
+@NPCClass base(BaseNPC) studio("models/Zombie/Fast_torso.mdl") = npc_fastzombie_torso : "Fast Zombie Torso"
+[
+  isheadless(choices) : "Spawn Without Headcrab" : 0 =
+  	[
+  		0 : "No"
+  		1 : "Yes"
+  	]
+    noheadcrabspawn(choices) : "Don't Detach Headcrab On Death" : 0 =
+  	[
+  		0 : "No"
+  		1 : "Yes"
+  	]
+]

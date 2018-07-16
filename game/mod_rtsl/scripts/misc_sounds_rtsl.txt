@@ -1,0 +1,10 @@
+"Weapon_Physgun.FreezeSound"
+{
+	"channel"		"CHAN_STATIC"
+	"volume"		"0.80"
+	"pitch"		"PITCH_NORM"
+
+	"soundlevel"	"SNDLVL_NORM"
+
+	"wave"		 "ambient\energy\weld1.wav" 
+}

@@ -1,0 +1,35 @@
+NOTE:
+If your have work featured in this mod template but do not have a credit, please contact Phillip immediately: runthinkshootlive@gmail.com
+
+MOD TEMPLATE CONCEPT:
+---------------------
+Mr. Mazur, Phillip, Don and crowbλr suggested of creating and using a mod template during a group discussion..
+
+
+GENERAL FIXES:
+---------------------
+Koneko: Restored the pistol shell ejection, replaced the HL1 .357 revolver worldmodel with a high quality one that uses Half-Life 2’s v_357.mdl as a base, fixed incorrect textures on the RPG worldmodel, increased detail on the AR2 worldmodel and made it so that the player holds the AR2 in both hands and not just one.
+iohnnyboy: Provided fixes for the dropship gun and making it so the antlion acid doesn’t stick around flashing your screen.
+
+
+STASIS CRYSTAL:
+---------------------
+crowbλr suggested the concept.
+Mr. Mazur wrote the code.
+Niker107 created and textured the model.
+The RTSL Mod Template team tested and suggested changes.
+
+
+MECHACRAB:
+---------------------
+Phillip created the concept as part of the promotion of Models for the Masses, back in 2011.
+Black_Stormy created the model.
+Mazur wrote the code and scripts.
+ihonnyboy provided assistance with the animations.
+Mathias H. Pedersen created the sound effects.
+
+
+RTSL GRAFFITI:
+---------------------
+Phillip suggested the concept and helped finalize the designs.
+Monkeymo created the designs.

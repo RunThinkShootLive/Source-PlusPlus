@@ -1,0 +1,8 @@
+vertexlitgeneric {
+$basetexture models/headcrab_classic/mechcrabdif
+$bumpmap models/headcrab_classic/mechcrabnor
+$envmap env_cubemap
+$normalmapalphaenvmapmask 1
+$alphatest 1
+$nocull 1
+}

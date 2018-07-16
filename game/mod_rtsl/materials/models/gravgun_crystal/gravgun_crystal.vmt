@@ -1,0 +1,14 @@
+VertexLitGeneric
+{
+	$basetexture "models/gravgun_crystal/gravgun_crystal"
+	$bumpmap "models/gravgun_crystal/gravgun_crystal_nrm"
+	$surfaceprop Metal
+
+	$phong 1
+	$phongfresnelranges "[0.2 0.5 1]"
+	$phongboost 5
+	$phongexponent 3
+
+	$selfillum 1
+	$selfillumtint "[1.0 0.5 1.0]"
+}

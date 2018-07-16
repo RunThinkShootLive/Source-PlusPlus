@@ -1,0 +1,15 @@
+This is version 1.3.4 of the RTSL Mod Template.
+
+Versions:
+
+1.0: Original release
+
+1.1: Added RTSL Graffiti
+
+1.2: Added MechaCrab
+
+1.3: Added Stasis Crystal, changed the MechaCrab health to 30 health points.
+1.3.1: Added Input StripGGFreezeModule to player_weaponstrip.
+1.3.2: Fixed GGFreeze and GGUnFreeze inputs not properly applying glow to the object and fixed fence props not being unfreezable with the gravity gun's tertiary freeze attack.
+1.3.3: You can now have up to 16 projected textures at the same time (including flashlight). Added loose VCD loading (scenes.image no longer has to be recompiled)
+1.3.4: Added two new keyvalues to npc_zombie, npc_zombie_torso, npc_fastzombie, npc_fastzombie_torso: spawn without a headcrab attached, prevent headcrab detach on death

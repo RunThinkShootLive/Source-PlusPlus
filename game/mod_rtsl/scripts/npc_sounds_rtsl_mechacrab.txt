@@ -1,0 +1,159 @@
+"NPC_MechaCrab.Burning"
+{
+	"channel"		"CHAN_STATIC"
+	"volume"		"0.45"
+	"pitch"		"PITCH_NORM"
+
+	"soundlevel"	"SNDLVL_75dB"
+
+	"wave"		 "npc/headcrab/headcrab_burning_loop2.wav" 
+}
+
+"NPC_MechaCrab.StopBurning"
+{
+	"channel"		"CHAN_STATIC"
+	"volume"		"VOL_NORM"
+	"pitch"		"PITCH_NORM"
+
+	"soundlevel"	"SNDLVL_NORM"
+
+	"wave"		 "common/null.wav" 
+}
+
+"NPC_MechaCrab.Gib"
+{
+	"channel"		"CHAN_WEAPON"
+	"volume"		"VOL_NORM"
+	"pitch"			"PITCH_NORM"
+
+	"soundlevel"	"SNDLVL_NORM"
+
+	"wave"			"physics/flesh/flesh_squishy_impact_hard2.wav"
+}
+
+"NPC_MechaCrab.Idle"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"VOL_NORM"
+	"pitch"			"PITCH_NORM"
+
+	"soundlevel"	"SNDLVL_IDLE"
+
+	"rndwave"
+	{
+		"wave"	"rtsl/mechacrab/idle1.wav"
+		"wave"	"rtsl/mechacrab/idle2.wav"
+		"wave"	"rtsl/mechacrab/idle3.wav"
+	}
+}
+
+"NPC_MechaCrab.Alert"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"VOL_NORM"
+	"pitch"		"PITCH_NORM"
+
+	"soundlevel"	"SNDLVL_IDLE"
+
+	"wave"			"rtsl/mechacrab/alert1.wav"
+}
+
+"NPC_MechaCrab.Pain"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"VOL_NORM"
+	"pitch"			"PITCH_NORM"
+
+	"soundlevel"	"SNDLVL_IDLE"
+
+	"rndwave"
+	{
+		"wave"	"rtsl/mechacrab/pain1.wav"
+		"wave"	"rtsl/mechacrab/pain2.wav"
+		"wave"	"rtsl/mechacrab/pain3.wav"
+	}
+}
+
+"NPC_MechaCrab.Die"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"VOL_NORM"
+	"pitch"			"PITCH_NORM"
+
+	"soundlevel"	"SNDLVL_IDLE"
+
+	"rndwave"
+	{
+		"wave"	"rtsl/mechacrab/die1.wav"
+		"wave"	"rtsl/mechacrab/die2.wav"
+	}
+}
+
+"NPC_MechaCrab.Bite"
+{
+	"channel"		"CHAN_WEAPON"
+	"volume"		"VOL_NORM"
+	"pitch"			"PITCH_NORM"
+
+	"soundlevel"	"SNDLVL_IDLE"
+
+	"wave"			"npc/headcrab/headbite.wav"
+}
+
+"NPC_MechaCrab.Attack"
+{
+	"channel"		"CHAN_VOICE"
+	"volume"		"VOL_NORM"
+	"pitch"			"PITCH_NORM"
+
+	"soundlevel"	"SNDLVL_IDLE"
+
+	"rndwave"
+	{
+		"wave"	"npc/headcrab/attack1.wav"
+		"wave"	"rtsl/mechacrab/attack2.wav"
+		"wave"	"rtsl/mechacrab/attack3.wav"
+	}
+}
+
+"NPC_MechaCrab.Footstep"
+{
+	"channel"		"CHAN_BODY"
+	"volume"		"0.4"
+	"pitch"			"95, 105"
+
+	"soundlevel"	"SNDLVL_NORM"
+
+	"rndwave"
+	{
+		"wave"	"npc/stalker/stalker_footstep_left1.wav"
+		"wave"	"npc/stalker/stalker_footstep_left2.wav"
+		"wave"	"npc/stalker/stalker_footstep_right1.wav"
+		"wave"	"npc/stalker/stalker_footstep_right2.wav"
+	}
+}
+
+"NPC_MechaCrab.BurrowIn"
+{
+	"channel"		"CHAN_BODY"
+	"volume"		"0.4"
+	"pitch"			"95, 105"
+
+	"soundlevel"	"SNDLVL_NORM"
+
+	"wave"			"npc/antlion/digdown1.wav"
+}
+
+"NPC_MechaCrab.BurrowOut"
+{
+	"channel"		"CHAN_BODY"
+	"volume"		"0.6"
+	
+	"soundlevel"	"SNDLVL_NORM"
+
+	"rndwave"
+	{
+		"wave"	"npc/antlion/digdown1.wav"
+	}
+}
+
